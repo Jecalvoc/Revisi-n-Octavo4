@@ -423,6 +423,22 @@
     margin-bottom: 20px;
     font-size: 1.05rem;
   }
+  .intentos-info {
+    display: inline-block;
+    background: rgba(255, 230, 0, 0.15);
+    border: 1px solid var(--neon-yellow);
+    color: var(--neon-yellow);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.95rem;
+    margin-bottom: 15px;
+    font-weight: bold;
+  }
+  .intentos-info.agotados {
+    background: rgba(255, 0, 0, 0.15);
+    border-color: #ff3333;
+    color: #ff6666;
+  }
   .opciones-lenguaje {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -437,7 +453,7 @@
     transition: all 0.3s;
     text-align: center;
   }
-  .opcion-lenguaje:hover {
+  .opcion-lenguaje:hover:not(.bloqueada) {
     border-color: var(--neon-green);
     transform: translateY(-3px);
   }
@@ -450,6 +466,11 @@
     border-color: #ff3333;
     background: rgba(255, 0, 0, 0.2);
     animation: sacudir 0.5s;
+  }
+  .opcion-lenguaje.bloqueada {
+    opacity: 0.4;
+    cursor: not-allowed;
+    filter: grayscale(0.5);
   }
   @keyframes correcto {
     0%, 100% { transform: scale(1); }
@@ -479,6 +500,10 @@
     display: none;
   }
   .explicacion.visible { display: block; }
+  .explicacion.fallo {
+    background: rgba(255, 107, 0, 0.1);
+    border-left-color: var(--neon-orange);
+  }
   
   /* BIBLIOTECA DE LENGUAJES */
   .biblioteca-lenguajes {
@@ -720,7 +745,7 @@
     color: white;
     font-size: 1rem;
   }
-  .decision:hover {
+  .decision:hover:not(.bloqueada) {
     border-color: var(--neon-orange);
     background: rgba(255, 107, 0, 0.1);
   }
@@ -731,6 +756,11 @@
   .decision.elegida-mala {
     border-color: #ff3333;
     background: rgba(255, 0, 0, 0.2);
+  }
+  .decision.bloqueada {
+    opacity: 0.4;
+    cursor: not-allowed;
+    filter: grayscale(0.5);
   }
   .retroalimentacion {
     margin-top: 15px;
@@ -812,6 +842,10 @@
     line-height: 1.6;
   }
   .info-box strong { color: var(--neon-yellow); }
+  .info-box.alerta {
+    background: rgba(255, 230, 0, 0.1);
+    border-left-color: var(--neon-yellow);
+  }
 </style>
 </head>
 <body>
@@ -892,8 +926,8 @@
   <div class="pacman-container">
     <div class="pacman-info">
       <h2 style="color: var(--neon-pink); margin-bottom: 10px;">👾 MISIÓN 1: EL LABERINTO BINARIO</h2>
-      <div class="info-box">
-        <strong>📚 Recuerda:</strong> Las computadoras solo entienden <strong>ceros y unos</strong> (sistema binario). El hexadecimal es una forma corta de escribir binario. Y para que la máquina entienda tu código, un <strong>compilador</strong> lo traduce.
+      <div class="info-box alerta">
+        <strong>⚠️ ¡Cuidado!</strong> Todas las respuestas se ven iguales (color verde). <strong>Debes leer la pregunta y pensar cuál es la correcta</strong> antes de comerla. ¡No te dejes engañar por las apariencias!
       </div>
       <div class="pregunta-actual" id="pregunta-pacman">Cargando pregunta...</div>
       <div class="stats-pacman">
@@ -949,7 +983,6 @@
   <div class="ecosistema-container">
     <h2 style="color: var(--neon-green); text-align: center; margin-bottom: 10px;">🌎 MISIÓN 3: EL MAPA TECNOLÓGICO</h2>
     
-    <!-- BIBLIOTECA DE LENGUAJES -->
     <div class="biblioteca-lenguajes">
       <h3 class="biblioteca-titulo">📚 Biblioteca de Lenguajes</h3>
       <p class="biblioteca-intro">
@@ -967,8 +1000,8 @@
       <div class="grid-lenguajes" id="grid-lenguajes"></div>
     </div>
     
-    <div class="info-box">
-      <strong>📚 Elige sabiamente:</strong> Ahora que conoces a los lenguajes, descubre cuál es el mejor para cada situación real en Latinoamérica. ¡Tu decisión importa!
+    <div class="info-box alerta">
+      <strong>⚠️ ¡Lee con atención!</strong> Solo tienes <strong>2 intentos</strong> por escenario. Si fallas ambos, el escenario se bloqueará y no podrás volver atrás. ¡Piensa bien antes de elegir!
     </div>
     <div id="contenedor-escenarios"></div>
   </div>
@@ -981,8 +1014,8 @@
   </div>
   <div class="etica-container">
     <h2 style="color: var(--neon-orange); text-align: center; margin-bottom: 10px;">🛡️ MISIÓN 4: EL ESCUDO DEL HÉROE</h2>
-    <div class="info-box">
-      <strong>📚 Ser desarrollador es un superpoder:</strong> Con grandes poderes vienen grandes responsabilidades. Tus decisiones afectan a miles de personas. ¡Aprende a tomar decisiones éticas!
+    <div class="info-box alerta">
+      <strong>⚠️ ¡Piensa antes de actuar!</strong> Solo tienes <strong>2 intentos</strong> por dilema. Una vez que agotes tus intentos, el dilema se bloqueará. ¡Reflexiona bien cada decisión!
     </div>
     <div id="contenedor-dilemas"></div>
   </div>
@@ -1352,19 +1385,30 @@ function dibujar() {
     }
   }
   
+  // TODAS las pills ahora son del mismo color VERDE (sin revelar cuál es la correcta)
   pills.forEach(p => {
     if (p.comida) return;
     const cx = p.x * TAM_CELDA + TAM_CELDA / 2;
     const cy = p.y * TAM_CELDA + TAM_CELDA / 2;
-    const color = p.esCorrecta ? '#39ff14' : '#ff2e93';
+    
+    // Color uniforme verde para todas las opciones
     const grad = ctx.createRadialGradient(cx, cy, 2, cx, cy, 15);
-    grad.addColorStop(0, 'white');
-    grad.addColorStop(0.5, color);
-    grad.addColorStop(1, 'transparent');
+    grad.addColorStop(0, '#ffffff');
+    grad.addColorStop(0.4, '#39ff14');
+    grad.addColorStop(1, 'rgba(57, 255, 20, 0.3)');
     ctx.fillStyle = grad;
     ctx.beginPath();
     ctx.arc(cx, cy, 14, 0, Math.PI * 2);
     ctx.fill();
+    
+    // Borde brillante
+    ctx.strokeStyle = '#39ff14';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 14, 0, Math.PI * 2);
+    ctx.stroke();
+    
+    // Número de opción
     ctx.fillStyle = '#000';
     ctx.font = 'bold 14px Fredoka';
     ctx.textAlign = 'center';
@@ -1373,13 +1417,14 @@ function dibujar() {
     ctx.fillText((idx + 1), cx, cy);
   });
   
-  ctx.fillStyle = 'rgba(0,0,0,0.8)';
+  // Leyenda de opciones (todas en verde, sin revelar la correcta)
+  ctx.fillStyle = 'rgba(0,0,0,0.85)';
   ctx.fillRect(0, canvas.height - 80, canvas.width, 80);
   ctx.font = '12px Fredoka';
   ctx.textAlign = 'left';
   pills.forEach((p, i) => {
-    const color = p.comida ? '#666' : (p.esCorrecta ? '#39ff14' : '#ff2e93');
-    ctx.fillStyle = color;
+    // Todas las opciones se muestran en el mismo color verde
+    ctx.fillStyle = p.comida ? '#666' : '#39ff14';
     ctx.fillText((i+1) + '. ' + p.texto, 10, canvas.height - 60 + i * 18);
   });
   
@@ -1525,133 +1570,99 @@ function reiniciarModulo2() {
 }
 
 // ============ MÓDULO 3: ECOSISTEMA ============
-// BIBLIOTECA DE LENGUAJES - 9 LENGUAJES
+const MAX_INTENTOS_M3 = 2;
+let intentosEscenarios = {};
+
 const bibliotecaLenguajes = [
   {
-    id: 'c',
-    clase: 'c',
-    categoria: 'bajo',
-    icono: 'C',
-    nombre: 'C',
+    id: 'c', clase: 'c', categoria: 'bajo', icono: 'C', nombre: 'C',
     subtitulo: 'El abuelo sabio de la programación',
-    resumen: 'Es uno de los lenguajes más antiguos (de 1972) y el "padre" de muchos otros como C++, Java y PHP. Es simple, rápido y muy cercano al hardware. Casi todos los sistemas operativos del mundo tienen partes escritas en C.',
-    usos: ['Sistemas operativos (Windows, Linux, macOS)', 'Compiladores e intérpretes de otros lenguajes', 'Software embebido (microcontroladores, Arduino)', 'Drivers de dispositivos', 'Herramientas del sistema'],
-    ejemplosLatam: 'En <strong>México</strong>, el sistema operativo Huayra Linux (usado en escuelas) tiene partes escritas en C. En <strong>Brasil</strong>, los sistemas embebidos de la industria aeronáutica de Embraer usan C para controlar los aviones. En <strong>Argentina</strong>, las universidades lo enseñan como base para entender cómo funciona realmente una computadora.',
+    resumen: 'Es uno de los lenguajes más antiguos (de 1972) y el "padre" de muchos otros como C++, Java y PHP. Es simple, rápido y muy cercano al hardware.',
+    usos: ['Sistemas operativos (Windows, Linux, macOS)', 'Compiladores e intérpretes', 'Software embebido (microcontroladores, Arduino)', 'Drivers de dispositivos'],
+    ejemplosLatam: 'En <strong>México</strong>, el sistema Huayra Linux tiene partes en C. En <strong>Brasil</strong>, Embraer usa C en sistemas aeronáuticos.',
     ventajas: ['Muy rápido y eficiente', 'Control total del hardware', 'Base para aprender otros lenguajes'],
-    desventajas: ['Difícil para principiantes', 'No tiene muchas funciones modernas listas para usar', 'Un error pequeño puede causar fallos graves'],
-    datoCurioso: '¡El kernel de Linux (el corazón del sistema operativo que usan los servidores de Google, Facebook y la NASA) está escrito en C desde hace más de 30 años!'
+    desventajas: ['Difícil para principiantes', 'No tiene funciones modernas listas', 'Un error pequeño puede causar fallos graves'],
+    datoCurioso: '¡El kernel de Linux está escrito en C desde hace más de 30 años!'
   },
   {
-    id: 'cpp',
-    clase: 'cpp',
-    categoria: 'bajo',
-    icono: 'C++',
-    nombre: 'C++',
+    id: 'cpp', clase: 'cpp', categoria: 'bajo', icono: 'C++', nombre: 'C++',
     subtitulo: 'El velocista del silicio',
-    resumen: 'Es el "hijo" de C (creado en 1985). Tiene toda la velocidad de C pero agrega "programación orientada a objetos", que ayuda a organizar mejor los proyectos grandes. Es el rey de la velocidad en software complejo.',
-    usos: ['Motores de videojuegos AAA (Unreal Engine)', 'Sistemas operativos (partes de Windows)', 'Software aeroespacial y de aviones', 'Sistemas bancarios de alta frecuencia', 'Navegadores web (Chrome, Firefox)'],
-    ejemplosLatam: 'En la <strong>Bolsa de Valores de São Paulo (Bovespa)</strong>, Brasil, usan C++ para procesar miles de transacciones por segundo. En <strong>Argentina</strong>, estudios como Globant lo usan para crear videojuegos con gráficos impresionantes. En <strong>México</strong>, empresas de telecomunicaciones lo usan en sus sistemas de red.',
-    ventajas: ['Velocidad extrema', 'Control total del hardware y la memoria', 'Ideal cuando cada milisegundo cuenta'],
-    desventajas: ['Curva de aprendizaje muy alta', 'Se tarda más tiempo en desarrollar programas', 'Un error pequeño puede romper todo el sistema'],
-    datoCurioso: '¡Los videojuegos más famosos como Fortnite, Call of Duty y GTA están hechos con motores escritos en C++!'
+    resumen: 'Es el "hijo" de C (1985). Tiene toda la velocidad de C pero agrega programación orientada a objetos. Es el rey de la velocidad en software complejo.',
+    usos: ['Motores de videojuegos AAA (Unreal Engine)', 'Sistemas operativos', 'Software aeroespacial', 'Sistemas bancarios de alta frecuencia', 'Navegadores web'],
+    ejemplosLatam: 'En la <strong>Bovespa</strong> de Brasil usan C++ para miles de transacciones por segundo. En <strong>Argentina</strong>, Globant lo usa para videojuegos AAA.',
+    ventajas: ['Velocidad extrema', 'Control total del hardware', 'Ideal cuando cada milisegundo cuenta'],
+    desventajas: ['Curva de aprendizaje muy alta', 'Se tarda más en desarrollar', 'Un error pequeño puede romper todo'],
+    datoCurioso: '¡Fortnite, Call of Duty y GTA están hechos con motores en C++!'
   },
   {
-    id: 'ensamblador',
-    clase: 'ensamblador',
-    categoria: 'bajo',
-    icono: 'ASM',
-    nombre: 'Ensamblador',
+    id: 'ensamblador', clase: 'ensamblador', categoria: 'bajo', icono: 'ASM', nombre: 'Ensamblador',
     subtitulo: 'El idioma secreto de la máquina',
-    resumen: 'Es el lenguaje más cercano al hardware que existe. Cada instrucción en ensamblador se traduce DIRECTAMENTE a un código máquina (ceros y unos). Es como hablar el mismo idioma que el procesador. Se usan siglas cortas como MOV, ADD, JMP para dar órdenes.',
-    usos: ['Programación de microcontroladores', 'Optimización extrema de código crítico', 'Sistemas embebidos muy pequeños', 'Análisis de virus y seguridad informática', 'Drivers de dispositivos muy específicos'],
-    ejemplosLatam: 'En <strong>Colombia</strong>, los ingenieros que trabajan con tarjetas electrónicas para sistemas de riego usan ensamblador para que el código ocupe poquísima memoria. En <strong>Brasil</strong>, las empresas de seguridad informática analizan virus leyendo su código en ensamblador. En las <strong>universidades de México y Perú</strong> se enseña para entender cómo funciona realmente una CPU.',
-    ventajas: ['Control absoluto del procesador', 'El código más rápido y pequeño posible', 'Ideal para dispositivos con muy poca memoria'],
-    desventajas: ['Muy difícil de aprender y escribir', 'Depende del tipo de procesador (no es portable)', 'Un programa grande sería kilométrico'],
-    datoCurioso: '¡Una instrucción como "MOV AX, 4C00" en ensamblador x86 se traduce directamente a los bytes B8 00 4C que el procesador Intel entiende!'
+    resumen: 'El lenguaje más cercano al hardware. Cada instrucción se traduce DIRECTAMENTE a código máquina. Usa siglas como MOV, ADD, JMP.',
+    usos: ['Microcontroladores', 'Optimización extrema', 'Sistemas embebidos pequeños', 'Análisis de virus y seguridad'],
+    ejemplosLatam: 'En <strong>Colombia</strong>, ingenieros lo usan para tarjetas de riego. En <strong>Brasil</strong>, empresas de seguridad analizan virus en ensamblador.',
+    ventajas: ['Control absoluto del procesador', 'Código más rápido y pequeño', 'Ideal para dispositivos con poca memoria'],
+    desventajas: ['Muy difícil de aprender', 'Depende del procesador', 'Un programa grande sería kilométrico'],
+    datoCurioso: '¡"MOV AX, 4C00" se traduce directamente a los bytes B8 00 4C que el procesador Intel entiende!'
   },
   {
-    id: 'python',
-    clase: 'python',
-    categoria: 'alto',
-    icono: 'Py',
-    nombre: 'Python',
+    id: 'python', clase: 'python', categoria: 'alto', icono: 'Py', nombre: 'Python',
     subtitulo: 'El amigo de la inteligencia artificial',
-    resumen: 'Es un lenguaje moderno (de 1991) famoso por ser fácil de leer y escribir. Su código parece casi inglés. Es el favorito de los científicos de datos y los expertos en inteligencia artificial.',
-    usos: ['Inteligencia Artificial y Machine Learning', 'Análisis de datos y estadísticas', 'Automatización de tareas repetitivas', 'Desarrollo web (Django, Flask)', 'Ciencia y investigación'],
-    ejemplosLatam: 'En <strong>Chile</strong>, las startups agrotech usan Python para analizar datos del clima y predecir cuándo regar los cultivos. En <strong>Colombia</strong>, los hospitales lo usan para analizar radiografías con IA. En <strong>México</strong>, el gobierno lo usa para procesar datos ciudadanos.',
-    ventajas: ['Muy fácil de aprender: perfecto para principiantes', 'Miles de librerías gratuitas listas para usar', 'Comunidad gigante que siempre ayuda'],
-    desventajas: ['Es más lento que C++ o Java', 'Consume más memoria RAM', 'No es ideal para videojuegos o sistemas críticos'],
-    datoCurioso: '¡Instagram, Netflix y Spotify usan Python en alguna parte de sus sistemas!'
+    resumen: 'Lenguaje moderno (1991) famoso por ser fácil de leer. Su código parece casi inglés. Favorito de científicos de datos y expertos en IA.',
+    usos: ['Inteligencia Artificial y Machine Learning', 'Análisis de datos', 'Automatización', 'Desarrollo web (Django, Flask)', 'Ciencia e investigación'],
+    ejemplosLatam: 'En <strong>Chile</strong>, startups agrotech lo usan para predecir riego. En <strong>Colombia</strong>, hospitales analizan radiografías con IA en Python.',
+    ventajas: ['Muy fácil de aprender', 'Miles de librerías gratuitas', 'Comunidad gigante'],
+    desventajas: ['Más lento que C++ o Java', 'Consume más memoria', 'No ideal para videojuegos'],
+    datoCurioso: '¡Instagram, Netflix y Spotify usan Python!'
   },
   {
-    id: 'java',
-    clase: 'java',
-    categoria: 'alto',
-    icono: 'Jv',
-    nombre: 'Java',
+    id: 'java', clase: 'java', categoria: 'alto', icono: 'Jv', nombre: 'Java',
     subtitulo: 'El gigante corporativo',
-    resumen: 'Es un lenguaje robusto (de 1995) famoso por su lema "Escribe una vez, ejecuta en cualquier lugar". Gracias a la Máquina Virtual de Java (JVM), el mismo código funciona en Windows, Mac, Linux y celulares Android.',
-    usos: ['Sistemas bancarios y financieros', 'Aplicaciones empresariales grandes', 'Aplicaciones Android', 'Sistemas de reservas y aerolíneas', 'Software corporativo (ERP, CRM)'],
-    ejemplosLatam: '<strong>Bancolombia</strong> y <strong>BBVA México</strong> usan Java para sus sistemas centrales que mueven billones de dólares. En <strong>Perú</strong>, el sistema de la Sunat (impuestos) está hecho en Java. <strong>Android</strong>, el sistema de la mayoría de celulares del mundo, está basado en Java.',
-    ventajas: ['Portabilidad total: funciona en cualquier dispositivo', 'Muy robusto y seguro para proyectos grandes', 'Maneja muchos usuarios al mismo tiempo sin problemas'],
-    desventajas: ['Consume mucha memoria RAM', 'El código es más largo que en Python', 'Las actualizaciones pueden ser lentas'],
-    datoCurioso: '¡Más de 3 mil millones de dispositivos en el mundo ejecutan Java! Desde celulares hasta tarjetas inteligentes y sistemas de navegación de autos.'
+    resumen: 'Lenguaje robusto (1995) con el lema "Escribe una vez, ejecuta en cualquier lugar". Gracias a la JVM, funciona en Windows, Mac, Linux y Android.',
+    usos: ['Sistemas bancarios', 'Aplicaciones empresariales', 'Aplicaciones Android', 'Sistemas de aerolíneas', 'Software corporativo'],
+    ejemplosLatam: '<strong>Bancolombia</strong> y <strong>BBVA México</strong> usan Java. En <strong>Perú</strong>, la Sunat usa Java. <strong>Android</strong> está basado en Java.',
+    ventajas: ['Portabilidad total', 'Muy robusto y seguro', 'Maneja muchos usuarios simultáneos'],
+    desventajas: ['Consume mucha memoria', 'Código más largo que Python', 'Actualizaciones lentas'],
+    datoCurioso: '¡Más de 3 mil millones de dispositivos ejecutan Java!'
   },
   {
-    id: 'javascript',
-    clase: 'javascript',
-    categoria: 'web',
-    icono: 'JS',
-    nombre: 'JavaScript',
+    id: 'javascript', clase: 'javascript', categoria: 'web', icono: 'JS', nombre: 'JavaScript',
     subtitulo: 'El rey de la web interactiva',
-    resumen: 'Es el lenguaje que hace que las páginas web cobren vida. Sin él, internet sería solo texto estático. Funciona en cualquier navegador sin instalar nada. ¡Es el lenguaje más popular del mundo!',
-    usos: ['Páginas web interactivas (animaciones, formularios)', 'Aplicaciones web completas (Gmail, Google Maps)', 'Servidores con Node.js', 'Aplicaciones móviles (React Native)', 'Videojuegos en el navegador'],
-    ejemplosLatam: '<strong>MercadoLibre</strong>, el Amazon latinoamericano, usa JavaScript para su página web. En <strong>Brasil</strong>, el portal Gov.br que usan millones de ciudadanos está hecho con JavaScript. En <strong>México</strong>, casi todas las tiendas en línea lo usan.',
-    ventajas: ['Funciona en todos los navegadores sin instalar nada', 'Es el lenguaje más demandado en ofertas de trabajo', 'Sirve para hacer de todo: web, móvil, servidor'],
-    desventajas: ['Fue creado muy rápido en 1995 y tiene algunas rarezas', 'Para proyectos muy grandes puede ser desordenado', 'No es tan rápido como C++ para cálculos pesados'],
-    datoCurioso: '¡JavaScript NO tiene nada que ver con Java! Son lenguajes completamente diferentes, solo comparten el nombre por marketing.'
+    resumen: 'El lenguaje que hace que las páginas web cobren vida. Sin él, internet sería solo texto estático. Funciona en cualquier navegador sin instalar nada.',
+    usos: ['Páginas web interactivas', 'Aplicaciones web completas', 'Servidores con Node.js', 'Aplicaciones móviles', 'Videojuegos en navegador'],
+    ejemplosLatam: '<strong>MercadoLibre</strong> usa JavaScript. En <strong>Brasil</strong>, Gov.br está hecho con JavaScript. En <strong>México</strong>, casi todas las tiendas en línea lo usan.',
+    ventajas: ['Funciona en todos los navegadores', 'Lenguaje más demandado laboralmente', 'Sirve para web, móvil y servidor'],
+    desventajas: ['Tiene algunas rarezas históricas', 'Puede ser desordenado en proyectos grandes', 'No tan rápido como C++'],
+    datoCurioso: '¡JavaScript NO tiene nada que ver con Java! Solo comparten el nombre por marketing.'
   },
   {
-    id: 'html',
-    clase: 'html',
-    categoria: 'web',
-    icono: '&lt;/&gt;',
-    nombre: 'HTML',
+    id: 'html', clase: 'html', categoria: 'web', icono: '&lt;/&gt;', nombre: 'HTML',
     subtitulo: 'El esqueleto de la web',
-    resumen: 'En realidad NO es un lenguaje de programación, sino un "lenguaje de marcado". Sirve para darle ESTRUCTURA a las páginas web: títulos, párrafos, imágenes, enlaces, botones. Todo lo que ves en internet empieza con HTML. Trabaja junto con CSS (para los estilos) y JavaScript (para la interacción).',
-    usos: ['Estructura de todas las páginas web', 'Correos electrónicos con diseño', 'Documentación técnica', 'Aplicaciones móviles híbridas', 'Contenido en plataformas educativas'],
-    ejemplosLatam: 'Cualquier página web que visites en Latinoamérica tiene HTML: desde el portal de <strong>AFIP en Argentina</strong>, hasta la página del <strong>SENAT en Paraguay</strong>, pasando por <strong>Rappi</strong> en Colombia o <strong>Falabella</strong> en Chile. Si puedes verlo en el navegador, tiene HTML.',
-    ventajas: ['Muy fácil de aprender: es el primer paso para hacer web', 'Funciona en cualquier dispositivo y navegador', 'Base obligatoria para todo desarrollador web'],
-    desventajas: ['No es un lenguaje de programación real (no hace cálculos)', 'Solo sirve para estructurar contenido', 'Necesita CSS y JavaScript para hacer cosas interesantes'],
-    datoCurioso: '¡HTML significa "HyperText Markup Language" (Lenguaje de Marcado de Hipertexto) y fue inventado en 1991 por Tim Berners-Lee, el mismo creador de la World Wide Web!'
+    resumen: 'NO es un lenguaje de programación, es un "lenguaje de marcado". Sirve para darle ESTRUCTURA a las páginas web: títulos, párrafos, imágenes, enlaces.',
+    usos: ['Estructura de páginas web', 'Correos electrónicos con diseño', 'Documentación técnica', 'Apps móviles híbridas'],
+    ejemplosLatam: 'Cualquier página web en Latinoamérica tiene HTML: <strong>AFIP Argentina</strong>, <strong>SENAT Paraguay</strong>, <strong>Rappi Colombia</strong>, <strong>Falabella Chile</strong>.',
+    ventajas: ['Muy fácil de aprender', 'Funciona en cualquier dispositivo', 'Base obligatoria para desarrollador web'],
+    desventajas: ['No es lenguaje de programación real', 'Solo estructura contenido', 'Necesita CSS y JavaScript'],
+    datoCurioso: '¡HTML fue inventado en 1991 por Tim Berners-Lee, el creador de la World Wide Web!'
   },
   {
-    id: 'sql',
-    clase: 'sql',
-    categoria: 'datos',
-    icono: 'SQL',
-    nombre: 'SQL',
+    id: 'sql', clase: 'sql', categoria: 'datos', icono: 'SQL', nombre: 'SQL',
     subtitulo: 'El detective de las bases de datos',
-    resumen: 'Es un lenguaje especial para hablar con bases de datos. Con SQL puedes guardar información, buscarla, ordenarla y modificarla. Cada vez que inicias sesión en una red social, SQL busca tu usuario en la base de datos. ¡Es el idioma universal de los datos!',
-    usos: ['Bases de datos relacionales (MySQL, PostgreSQL, Oracle)', 'Análisis de grandes volúmenes de datos', 'Sistemas bancarios y de facturación', 'Reportes empresariales', 'Backend de aplicaciones (junto con otros lenguajes)'],
-    ejemplosLatam: 'Cuando consultas tu saldo en la app de <strong>Davivienda en Colombia</strong>, SQL busca tu información. Cuando el <strong>SAT de México</strong> procesa millones de declaraciones de impuestos, usa SQL. Cuando <strong>Falabella</strong> en Chile revisa su inventario, SQL mantiene todo organizado.',
-    ventajas: ['Es el estándar mundial para bases de datos', 'Muy poderoso para manejar millones de registros', 'Se usa en TODAS las empresas grandes'],
-    desventajas: ['Solo sirve para bases de datos relacionales', 'Puede ser lento si las consultas están mal hechas', 'Tiene muchas versiones con pequeñas diferencias'],
-    datoCurioso: '¡SQL se pronuncia "es-ciu-el" o "sequel"! Y fue creado en los años 70 en los laboratorios de IBM. Hoy lo usan desde bancos hasta la NASA.'
+    resumen: 'Lenguaje especial para hablar con bases de datos. Puedes guardar, buscar, ordenar y modificar información. ¡Es el idioma universal de los datos!',
+    usos: ['Bases de datos (MySQL, PostgreSQL, Oracle)', 'Análisis de grandes volúmenes', 'Sistemas bancarios y facturación', 'Reportes empresariales'],
+    ejemplosLatam: 'Cuando consultas tu saldo en <strong>Davivienda Colombia</strong>, SQL busca tu info. El <strong>SAT México</strong> procesa impuestos con SQL. <strong>Falabella Chile</strong> maneja inventario con SQL.',
+    ventajas: ['Estándar mundial para bases de datos', 'Muy poderoso con millones de registros', 'Se usa en TODAS las empresas grandes'],
+    desventajas: ['Solo sirve para bases de datos relacionales', 'Puede ser lento si las consultas están mal', 'Tiene variantes con diferencias'],
+    datoCurioso: '¡SQL se pronuncia "es-ciu-el" o "sequel"! Fue creado en los años 70 en IBM.'
   },
   {
-    id: 'ruby',
-    clase: 'ruby',
-    categoria: 'alto',
-    icono: 'Rb',
-    nombre: 'Ruby',
+    id: 'ruby', clase: 'ruby', categoria: 'alto', icono: 'Rb', nombre: 'Ruby',
     subtitulo: 'La joya de la productividad',
-    resumen: 'Es un lenguaje elegante (de 1995, creado en Japón) famoso por ser bonito de leer y muy productivo. Su framework "Ruby on Rails" permite crear aplicaciones web completas en muy poco tiempo. Es el favorito de las startups que necesitan lanzar rápido.',
-    usos: ['Desarrollo web rápido (Ruby on Rails)', 'Startups y prototipos', 'Automatización de tareas', 'Herramientas de línea de comandos', 'Plataformas educativas'],
-    ejemplosLatam: '<strong>GitHub</strong>, donde los programadores guardan su código, está hecho en Ruby. En <strong>Brasil</strong>, la plataforma de cursos Alura usa Ruby. En <strong>Argentina</strong>, muchas startups fintech lo usaron para lanzar sus primeros productos rápidamente. En <strong>México</strong>, la plataforma de pedidos Clip lo tiene en su base.',
-    ventajas: ['Muy productivo: escribes poco código y haces mucho', 'Comunidad amable y colaborativa', 'Ideal para empezar startups rápidamente'],
-    desventajas: ['Menos popular que antes (perdió terreno frente a JavaScript y Python)', 'Más lento que otros lenguajes', 'Menos ofertas de trabajo actualmente'],
-    datoCurioso: '¡Ruby fue creado por Yukihiro Matsumoto en Japón! Su nombre viene de la piedra preciosa, siguiendo la tradición de Perl (que viene de "perla"). Su lema es: "Ruby makes you happy" (Ruby te hace feliz).'
+    resumen: 'Lenguaje elegante (1995, Japón) famoso por ser bonito de leer. Su framework "Ruby on Rails" permite crear aplicaciones web completas rápidamente.',
+    usos: ['Desarrollo web rápido (Ruby on Rails)', 'Startups y prototipos', 'Automatización', 'Herramientas de línea de comandos'],
+    ejemplosLatam: '<strong>GitHub</strong> está hecho en Ruby. En <strong>Brasil</strong>, Alura usa Ruby. En <strong>Argentina</strong>, muchas startups fintech lo usaron para lanzar rápido.',
+    ventajas: ['Muy productivo: poco código, mucho resultado', 'Comunidad amable', 'Ideal para startups rápidas'],
+    desventajas: ['Menos popular que antes', 'Más lento que otros', 'Menos ofertas de trabajo'],
+    datoCurioso: '¡Ruby fue creado en Japón por Yukihiro Matsumoto! Su lema: "Ruby makes you happy".'
   }
 ];
 
@@ -1739,25 +1750,25 @@ function toggleDetalle(id, btn) {
 const escenarios = [
   {
     titulo: '🏦 Escenario 1: Banco Nacional',
-    texto: 'Un gran banco de Colombia necesita un sistema que maneje millones de transacciones por segundo sin fallar. La seguridad y la velocidad son CRÍTICAS. Si el sistema falla, la economía del país se afecta.',
+    texto: 'Un gran banco de Colombia necesita un sistema que maneje millones de transacciones por segundo sin fallar. La seguridad y la velocidad son CRÍTICAS.',
     opciones: [
       { nombre: 'Python', desc: 'Rápido de desarrollar, fácil de aprender', correcta: false },
       { nombre: 'C++', desc: 'Máxima velocidad y control del hardware', correcta: true },
       { nombre: 'JavaScript', desc: 'Ideal para páginas web', correcta: false },
       { nombre: 'HTML', desc: 'Para diseñar páginas', correcta: false }
     ],
-    explicacion: '✅ ¡Correcto! C++ es perfecto porque permite controlar la memoria directamente y ejecutar miles de transacciones por segundo con latencia mínima. Los sistemas de pago como la Bovespa en Brasil usan C++ por esta razón.'
+    explicacion: '✅ ¡Correcto! C++ permite controlar la memoria directamente y ejecutar miles de transacciones por segundo con latencia mínima. La Bovespa en Brasil usa C++ por esta razón.'
   },
   {
     titulo: '🌱 Escenario 2: Startup Agrotech',
-    texto: 'Una startup en Chile quiere analizar datos del clima y suelo para predecir cuándo regar los cultivos. Necesitan usar inteligencia artificial y lanzar el producto rápido para conseguir inversionistas.',
+    texto: 'Una startup en Chile quiere analizar datos del clima y suelo para predecir cuándo regar los cultivos. Necesitan usar inteligencia artificial y lanzar el producto rápido.',
     opciones: [
       { nombre: 'C++', desc: 'Máximo rendimiento', correcta: false },
       { nombre: 'Ensamblador', desc: 'Control total del hardware', correcta: false },
       { nombre: 'Python', desc: 'Librerías de IA y desarrollo rápido', correcta: true },
       { nombre: 'SQL', desc: 'Solo para bases de datos', correcta: false }
     ],
-    explicacion: '✅ ¡Excelente! Python tiene librerías poderosas de IA como TensorFlow y pandas, y permite prototipar en semanas. Las startups agrotech chilenas lo usan para analizar datos agrícolas.'
+    explicacion: '✅ ¡Excelente! Python tiene librerías poderosas de IA como TensorFlow y pandas, y permite prototipar en semanas.'
   },
   {
     titulo: '🛒 Escenario 3: E-commerce Latino',
@@ -1768,62 +1779,62 @@ const escenarios = [
       { nombre: 'C', desc: 'Lenguaje de bajo nivel', correcta: false },
       { nombre: 'Ruby', desc: 'Más para servidores', correcta: false }
     ],
-    explicacion: '✅ ¡Perfecto! JavaScript es el lenguaje de la web. Junto con Node.js, puede usarse también en el servidor. MercadoLibre, Amazon y casi toda la web interactiva lo usa.'
+    explicacion: '✅ ¡Perfecto! JavaScript es el lenguaje de la web. Junto con Node.js, puede usarse también en el servidor.'
   },
   {
     titulo: '🏢 Escenario 4: Sistema Corporativo',
-    texto: 'Una empresa grande en México necesita un sistema que funcione igual en Windows, Linux y Mac. Debe ser robusto, manejar muchos usuarios al mismo tiempo y durar años sin cambios mayores.',
+    texto: 'Una empresa grande en México necesita un sistema que funcione igual en Windows, Linux y Mac. Debe ser robusto, manejar muchos usuarios y durar años.',
     opciones: [
       { nombre: 'JavaScript', desc: 'Solo para web', correcta: false },
       { nombre: 'Python', desc: 'Muy flexible', correcta: false },
       { nombre: 'Java', desc: '"Escribe una vez, ejecuta en cualquier lugar"', correcta: true },
       { nombre: 'HTML', desc: 'No es un lenguaje de programación', correcta: false }
     ],
-    explicacion: '✅ ¡Correcto! Java tiene la JVM (Máquina Virtual de Java) que permite que el mismo código corra en cualquier sistema. Bancolombia y BBVA México usan Java para sus sistemas centrales.'
+    explicacion: '✅ ¡Correcto! Java tiene la JVM que permite que el mismo código corra en cualquier sistema. Bancolombia y BBVA México usan Java.'
   },
   {
     titulo: '🎮 Escenario 5: Videojuego AAA',
-    texto: 'Un estudio en Argentina quiere crear un videojuego con gráficos ultra realistas que corra fluido en consolas y PCs. Cada milisegundo cuenta para que el juego no se trabe.',
+    texto: 'Un estudio en Argentina quiere crear un videojuego con gráficos ultra realistas que corra fluido en consolas y PCs. Cada milisegundo cuenta.',
     opciones: [
       { nombre: 'Python', desc: 'Muy lento para juegos AAA', correcta: false },
       { nombre: 'JavaScript', desc: 'No tiene suficiente rendimiento', correcta: false },
       { nombre: 'C++', desc: 'Control total y máximo rendimiento', correcta: true },
       { nombre: 'Ruby', desc: 'Lenguaje web', correcta: false }
     ],
-    explicacion: '✅ ¡Excelente! C++ es el lenguaje de los motores de videojuegos como Unreal Engine. Permite controlar cada detalle del hardware para lograr los gráficos más impresionantes.'
+    explicacion: '✅ ¡Excelente! C++ es el lenguaje de los motores de videojuegos como Unreal Engine.'
   },
   {
     titulo: '💾 Escenario 6: Sistema de Inventario',
-    texto: 'Una cadena de supermercados en Perú necesita guardar y consultar información de millones de productos: precios, stock, fechas de vencimiento. Debe poder buscar productos por nombre, categoría o proveedor en milisegundos.',
+    texto: 'Una cadena de supermercados en Perú necesita guardar y consultar información de millones de productos: precios, stock, fechas. Debe buscar productos en milisegundos.',
     opciones: [
       { nombre: 'HTML', desc: 'Solo estructura páginas web', correcta: false },
       { nombre: 'SQL', desc: 'El rey de las bases de datos', correcta: true },
       { nombre: 'Ensamblador', desc: 'Demasiado complejo para esto', correcta: false },
       { nombre: 'Ruby', desc: 'No es lo más eficiente', correcta: false }
     ],
-    explicacion: '✅ ¡Perfecto! SQL es el lenguaje especializado para bases de datos. Con una consulta como "SELECT * FROM productos WHERE categoria=\'lacteos\'" puedes encontrar lo que necesitas entre millones de registros. Walmart, Falabella y todos los supermercados lo usan.'
+    explicacion: '✅ ¡Perfecto! SQL es el lenguaje especializado para bases de datos. Walmart, Falabella y todos los supermercados lo usan.'
   },
   {
     titulo: '🔧 Escenario 7: Microcontrolador de Riego',
-    texto: 'Un ingeniero en Colombia necesita programar un pequeño chip (microcontrolador) que controla el riego automático de un cultivo. El chip tiene solo 2KB de memoria y debe consumir la mínima energía posible.',
+    texto: 'Un ingeniero en Colombia debe programar un chip que controla riego automático. El chip tiene solo 2KB de memoria y debe consumir mínima energía.',
     opciones: [
       { nombre: 'Python', desc: 'Consume mucha memoria', correcta: false },
       { nombre: 'Java', desc: 'Necesita máquina virtual', correcta: false },
       { nombre: 'Ensamblador', desc: 'Control absoluto y mínimo tamaño', correcta: true },
       { nombre: 'JavaScript', desc: 'No funciona en microcontroladores', correcta: false }
     ],
-    explicacion: '✅ ¡Correcto! Ensamblador permite escribir código que ocupa poquísima memoria y se ejecuta directamente en el procesador. Para dispositivos muy pequeños con recursos limitados, es la mejor opción.'
+    explicacion: '✅ ¡Correcto! Ensamblador permite código que ocupa poquísima memoria y se ejecuta directamente en el procesador.'
   },
   {
     titulo: '🌐 Escenario 8: Portal del Gobierno',
-    texto: 'El gobierno de Ecuador quiere crear un portal web donde los ciudadanos puedan ver información, descargar formularios y leer noticias. Necesita una estructura clara y accesible para todos los navegadores.',
+    texto: 'El gobierno de Ecuador quiere crear un portal web donde los ciudadanos puedan ver información, descargar formularios y leer noticias.',
     opciones: [
       { nombre: 'C++', desc: 'Demasiado complejo para esto', correcta: false },
       { nombre: 'HTML', desc: 'Estructura el contenido web', correcta: true },
       { nombre: 'Ensamblador', desc: 'No tiene sentido aquí', correcta: false },
       { nombre: 'SQL', desc: 'Solo para bases de datos', correcta: false }
     ],
-    explicacion: '✅ ¡Correcto! HTML es la base de cualquier página web. Con HTML se estructuran los títulos, párrafos, imágenes y formularios. Luego se combina con CSS para los estilos y JavaScript para la interactividad.'
+    explicacion: '✅ ¡Correcto! HTML es la base de cualquier página web. Se combina con CSS para estilos y JavaScript para interactividad.'
   }
 ];
 
@@ -1831,18 +1842,21 @@ let escenariosCompletados = 0;
 
 function iniciarModulo3() {
   escenariosCompletados = 0;
+  intentosEscenarios = {};
   filtroActual = 'todos';
   construirBiblioteca();
   const cont = document.getElementById('contenedor-escenarios');
   cont.innerHTML = '';
   escenarios.forEach((esc, i) => {
+    intentosEscenarios[i] = { usados: 0, completado: false };
     const div = document.createElement('div');
     div.className = 'escenario';
     div.id = 'esc-' + i;
     div.innerHTML = `
       <h3 class="escenario-titulo">${esc.titulo}</h3>
       <p class="escenario-texto">${esc.texto}</p>
-      <div class="opciones-lenguaje">
+      <div class="intentos-info" id="intentos-esc-${i}">🎯 Intentos restantes: ${MAX_INTENTOS_M3} de ${MAX_INTENTOS_M3}</div>
+      <div class="opciones-lenguaje" id="opciones-esc-${i}">
         ${esc.opciones.map((op, j) => `
           <div class="opcion-lenguaje" onclick="seleccionarOpcion(${i}, ${j})">
             <div class="nombre-lenguaje">${op.nombre}</div>
@@ -1857,75 +1871,130 @@ function iniciarModulo3() {
   actualizarProgreso(3, 0);
 }
 
+function actualizarInfoIntentos(idx) {
+  const info = intentosEscenarios[idx];
+  const el = document.getElementById('intentos-esc-' + idx);
+  const restantes = MAX_INTENTOS_M3 - info.usados;
+  if (info.completado) {
+    el.textContent = '✅ Escenario completado';
+    el.classList.remove('agotados');
+  } else if (restantes <= 0) {
+    el.textContent = '🚫 Sin intentos - Escenario bloqueado';
+    el.classList.add('agotados');
+  } else {
+    el.textContent = `🎯 Intentos restantes: ${restantes} de ${MAX_INTENTOS_M3}`;
+    el.classList.remove('agotados');
+  }
+}
+
+function bloquearOpcionesEscenario(idx) {
+  const cont = document.getElementById('opciones-esc-' + idx);
+  const opciones = cont.querySelectorAll('.opcion-lenguaje');
+  opciones.forEach(op => {
+    op.classList.add('bloqueada');
+    op.onclick = null;
+  });
+}
+
 function seleccionarOpcion(escIdx, opIdx) {
+  const info = intentosEscenarios[escIdx];
+  if (info.completado || info.usados >= MAX_INTENTOS_M3) return;
+  
   const esc = document.getElementById('esc-' + escIdx);
-  if (esc.dataset.completado) return;
-  const opciones = esc.querySelectorAll('.opcion-lenguaje');
+  const contOpciones = document.getElementById('opciones-esc-' + escIdx);
+  const opciones = contOpciones.querySelectorAll('.opcion-lenguaje');
   const correcta = escenarios[escIdx].opciones[opIdx].correcta;
-  opciones[opIdx].classList.add(correcta ? 'correcta' : 'incorrecta');
+  
+  info.usados++;
+  
   if (correcta) {
-    esc.dataset.completado = 'true';
+    opciones[opIdx].classList.add('correcta');
+    info.completado = true;
     document.getElementById('exp-' + escIdx).classList.add('visible');
     actualizarPuntos(3, 15);
     escenariosCompletados++;
     actualizarProgreso(3, (escenariosCompletados / escenarios.length) * 100);
     notificar('✅ ¡Decisión correcta! +15 puntos');
+    bloquearOpcionesEscenario(escIdx);
+    actualizarInfoIntentos(escIdx);
+    
     if (escenariosCompletados === escenarios.length) {
       setTimeout(() => {
         mostrarModal('🌟', '¡Mapa Completo!', 'Has elegido el lenguaje correcto para cada empresa latinoamericana. ¡Eres un arquitecto de software!');
       }, 1500);
     }
   } else {
-    notificar('❌ Ese no es el mejor lenguaje para este caso', 'error');
-    setTimeout(() => opciones[opIdx].classList.remove('incorrecta'), 1500);
+    opciones[opIdx].classList.add('incorrecta');
+    notificar(`❌ Incorrecto. Intento ${info.usados} de ${MAX_INTENTOS_M3}`, 'error');
+    
+    // Bloquear la opción incorrecta elegida
+    opciones[opIdx].classList.add('bloqueada');
+    opciones[opIdx].onclick = null;
+    
+    actualizarInfoIntentos(escIdx);
+    
+    // Si se agotaron los intentos, bloquear todo el escenario
+    if (info.usados >= MAX_INTENTOS_M3) {
+      setTimeout(() => {
+        bloquearOpcionesEscenario(escIdx);
+        const expEl = document.getElementById('exp-' + escIdx);
+        const correctaIdx = escenarios[escIdx].opciones.findIndex(o => o.correcta);
+        expEl.innerHTML = `⚠️ <strong>Agotaste tus intentos.</strong> La respuesta correcta era: <strong>${escenarios[escIdx].opciones[correctaIdx].nombre}</strong>. ${escenarios[escIdx].explicacion}`;
+        expEl.classList.add('visible', 'fallo');
+        notificar('🚫 Escenario bloqueado. Sigue con el siguiente.', 'error');
+      }, 1000);
+    }
   }
 }
 
 // ============ MÓDULO 4: ÉTICA ============
+const MAX_INTENTOS_M4 = 2;
+let intentosDilemas = {};
+
 const dilemas = [
   {
     titulo: '⚖️ Dilema 1: El Código Copiado',
-    texto: 'Encuentras una librería increíble en internet con licencia GPL (que exige que todo lo que la use sea también abierto). Tu jefe te dice: "Úsala en nuestro producto privado y no digamos nada. Nadie se va a enterar". ¿Qué haces?',
+    texto: 'Encuentras una librería con licencia GPL. Tu jefe te dice: "Úsala en nuestro producto privado y no digamos nada". ¿Qué haces?',
     decisiones: [
-      { texto: '🔴 Usarla en secreto. El jefe manda y necesitamos el trabajo.', buena: false, retro: '❌ Esto viola la licencia GPL y es un delito legal. Si se descubre, la empresa puede enfrentar demandas millonarias y tú serás responsable. Además, traicionas a la comunidad de desarrolladores que creó la librería gratis.' },
-      { texto: '🟢 Explicarle al jefe que viola la licencia y proponer alternativas: buscar una librería con licencia MIT/Apache, o crear nuestra propia versión.', buena: true, retro: '✅ ¡Excelente decisión! Respetas la ley, la ética profesional y propones soluciones. Las licencias MIT y Apache sí permiten uso privado. Un buen desarrollador siempre busca el camino correcto.' },
-      { texto: '🟡 Borrar los comentarios de licencia para que "no se note".', buena: false, retro: '❌ Esto es fraude deliberado. Eliminar avisos de licencia es ilegal en la mayoría de países. Los auditores de código pueden detectarlo fácilmente.' }
+      { texto: '🔴 Usarla en secreto. El jefe manda.', buena: false, retro: '❌ Viola la licencia GPL y es un delito legal. Traicionas a la comunidad.' },
+      { texto: '🟢 Explicarle al jefe que viola la licencia y proponer alternativas con licencia MIT/Apache.', buena: true, retro: '✅ ¡Excelente! Respetas la ley y propones soluciones.' },
+      { texto: '🟡 Borrar los comentarios de licencia para que "no se note".', buena: false, retro: '❌ Esto es fraude deliberado. Los auditores lo detectarán.' }
     ]
   },
   {
     titulo: '🤖 Dilema 2: La IA que Copia',
-    texto: 'Usas una IA para generar código rápidamente. La IA te da un fragmento que funciona perfecto, pero al revisar descubres que es idéntico a código de un proyecto con licencia restrictiva. Tu fecha de entrega es mañana. ¿Qué haces?',
+    texto: 'Una IA te da código idéntico a un proyecto con licencia restrictiva. Tu entrega es mañana. ¿Qué haces?',
     decisiones: [
-      { texto: '🔴 Usarlo tal cual. "La IA lo hizo, no yo".', buena: false, retro: '❌ ¡Error! TÚ eres el responsable final de todo lo que compilas. Aceptar código sin auditarlo es transferir tu responsabilidad ética a una máquina. Si viola licencia, el problema es tuyo.' },
-      { texto: '🟢 Reescribirlo con tu propia lógica entendiendo el problema, o buscar una alternativa original. Pedir más tiempo si es necesario.', buena: true, retro: '✅ ¡Correcto! El ingeniero es el único responsable de lo que compila. Entender el código y escribirlo tú mismo (o usar alternativas originales) es el camino ético. La calidad vale más que la velocidad.' },
-      { texto: '🟡 Usarlo y "modificarle algunas variables" para que "no sea igual".', buena: false, retro: '❌ Cambiar nombres de variables no hace que el código sea original. Es como copiar una tarea cambiando palabras. Los detectores de similitud lo identificarán.' }
+      { texto: '🔴 Usarlo tal cual. "La IA lo hizo, no yo".', buena: false, retro: '❌ TÚ eres el responsable final de lo que compilas.' },
+      { texto: '🟢 Reescribirlo con tu propia lógica o buscar alternativa original.', buena: true, retro: '✅ ¡Correcto! El ingeniero es responsable de lo que compila.' },
+      { texto: '🟡 Modificarle algunas variables para que "no sea igual".', buena: false, retro: '❌ Cambiar nombres no hace el código original.' }
     ]
   },
   {
     titulo: '🔒 Dilema 3: Los Datos de los Usuarios',
-    texto: 'Trabajas en una app de salud. Tu compañero te dice: "No perdamos tiempo con encriptación ni validaciones. Hay que lanzar ya. Si hay una filtración de datos de pacientes, ya veremos cómo arreglarlo". ¿Qué haces?',
+    texto: 'Trabajas en una app de salud. Tu compañero dice: "No perdamos tiempo con encriptación. Hay que lanzar ya". ¿Qué haces?',
     decisiones: [
-      { texto: '🔴 Hacerle caso. La velocidad es lo más importante en una startup.', buena: false, retro: '❌ Negligencia grave. Los datos de salud son sensibles y están protegidos por ley. Una filtración puede dañar a miles de pacientes y destruir la empresa. La seguridad NO es opcional.' },
-      { texto: '🟢 Insistir en implementar encriptación y validaciones desde el inicio. Explicar que "seguridad por diseño" ahorra problemas futuros y protege a los usuarios.', buena: true, retro: '✅ ¡Perfecto! La seguridad por diseño es un deber ético y legal. El desarrollador es el guardián de los datos del usuario. Corregir fallos después cuesta 100 veces más que prevenirlos.' },
-      { texto: '🟡 Hacer encriptación "básica" solo para cumplir, sin revisar si realmente funciona.', buena: false, retro: '❌ La seguridad a medias es peor que ninguna. Una encriptación mal implementada da falsa sensación de protección. Debe hacerse bien desde el principio.' }
+      { texto: '🔴 Hacerle caso. La velocidad es lo más importante.', buena: false, retro: '❌ Negligencia grave. Los datos de salud están protegidos por ley.' },
+      { texto: '🟢 Insistir en encriptación y validaciones desde el inicio.', buena: true, retro: '✅ ¡Perfecto! La seguridad por diseño es un deber ético.' },
+      { texto: '🟡 Hacer encriptación "básica" solo para cumplir.', buena: false, retro: '❌ Seguridad a medias es peor que ninguna.' }
     ]
   },
   {
     titulo: '📜 Dilema 4: El Código Sucio',
-    texto: 'Terminas un proyecto pero con el código desordenado, sin comentarios, con funciones gigantes. Tu cliente no se da cuenta. Tu jefe dice: "Entrégalo así, total el cliente no sabe programar". ¿Qué haces?',
+    texto: 'Terminas un proyecto con código desordenado. Tu jefe dice: "Entrégalo así, el cliente no sabe programar". ¿Qué haces?',
     decisiones: [
-      { texto: '🔴 Entregarlo así. El cliente paga por resultados, no por código bonito.', buena: false, retro: '❌ Esto crea "deuda técnica": un pasivo financiero y moral. El código será imposible de mantener, actualizar o corregir. Eventualmente fallará y dañará al cliente.' },
-      { texto: '🟢 Documentar, refactorizar y entregar código limpio aunque tome más tiempo. Explicar al cliente que esto garantiza que el sistema dure años.', buena: true, retro: '✅ ¡Excelente! El código limpio es tu firma profesional. La deuda técnica es un fraude al cliente. Un buen desarrollador entrega calidad, no solo "algo que funciona por ahora".' },
-      { texto: '🟡 Agregar algunos comentarios rápidos y entregar.', buena: false, retro: '❌ Comentarios superficiales no arreglan código mal estructurado. Es como poner pintura sobre una casa con problemas estructurales.' }
+      { texto: '🔴 Entregarlo así. El cliente paga por resultados.', buena: false, retro: '❌ Creas deuda técnica: un pasivo financiero y moral.' },
+      { texto: '🟢 Documentar, refactorizar y entregar código limpio.', buena: true, retro: '✅ ¡Excelente! El código limpio es tu firma profesional.' },
+      { texto: '🟡 Agregar algunos comentarios rápidos y entregar.', buena: false, retro: '❌ Comentarios superficiales no arreglan código mal estructurado.' }
     ]
   },
   {
     titulo: '🎓 Dilema 5: El Trabajo de Otro',
-    texto: 'Un compañero de clase te pide su trabajo de programación para "inspirarte". Tú sabes que si lo copias y le cambias algunas cosas, el profesor no lo notará. Ambos necesitan buena nota. ¿Qué haces?',
+    texto: 'Un compañero te pide su trabajo para "inspirarte". Si lo copias y cambias cosas, el profesor no lo notará. ¿Qué haces?',
     decisiones: [
-      { texto: '🔴 Copiarlo y cambiarle nombres de variables. "Todos lo hacen".', buena: false, retro: '❌ Esto es plagio, un fraude intelectual. Además de ser deshonesto, no aprendes nada. Si te descubren, ambos pueden ser expulsados. Tu código debe ser TU trabajo.' },
-      { texto: '🟢 Negarte amablemente. Ofrecerle estudiar juntos y ayudarlo a entender los conceptos para que haga su propio trabajo.', buena: true, retro: '✅ ¡Correcto! La verdadera colaboración es enseñar, no copiar. Ayudar a un compañero a aprender es inspiración. Copiar su trabajo es parasitismo intelectual. Tu éxito debe construirse sobre tu esfuerzo.' },
-      { texto: '🟡 Copiar solo "una parte" para darte ideas.', buena: false, retro: '❌ Copiar aunque sea una parte sigue siendo plagio. La línea entre inspiración y copia es clara: si no lo escribiste tú ni lo entiendes completamente, es copia.' }
+      { texto: '🔴 Copiarlo y cambiarle nombres. "Todos lo hacen".', buena: false, retro: '❌ Esto es plagio, un fraude intelectual.' },
+      { texto: '🟢 Negarte amablemente y ofrecerle estudiar juntos.', buena: true, retro: '✅ ¡Correcto! La verdadera colaboración es enseñar, no copiar.' },
+      { texto: '🟡 Copiar solo "una parte" para darte ideas.', buena: false, retro: '❌ Copiar aunque sea una parte sigue siendo plagio.' }
     ]
   }
 ];
@@ -1934,16 +2003,19 @@ let dilemasCompletados = 0;
 
 function iniciarModulo4() {
   dilemasCompletados = 0;
+  intentosDilemas = {};
   const cont = document.getElementById('contenedor-dilemas');
   cont.innerHTML = '';
   dilemas.forEach((d, i) => {
+    intentosDilemas[i] = { usados: 0, completado: false };
     const div = document.createElement('div');
     div.className = 'dilema';
     div.id = 'dilema-' + i;
     div.innerHTML = `
       <h3 class="dilema-titulo">${d.titulo}</h3>
       <div class="dilema-texto">${d.texto}</div>
-      <div class="decisiones">
+      <div class="intentos-info" id="intentos-dilema-${i}">🎯 Intentos restantes: ${MAX_INTENTOS_M4} de ${MAX_INTENTOS_M4}</div>
+      <div class="decisiones" id="decisiones-${i}">
         ${d.decisiones.map((dec, j) => `
           <button class="decision" onclick="seleccionarDecision(${i}, ${j})">${dec.texto}</button>
         `).join('')}
@@ -1955,30 +2027,81 @@ function iniciarModulo4() {
   actualizarProgreso(4, 0);
 }
 
+function actualizarInfoIntentosDilema(idx) {
+  const info = intentosDilemas[idx];
+  const el = document.getElementById('intentos-dilema-' + idx);
+  const restantes = MAX_INTENTOS_M4 - info.usados;
+  if (info.completado) {
+    el.textContent = '✅ Dilema resuelto correctamente';
+    el.classList.remove('agotados');
+  } else if (restantes <= 0) {
+    el.textContent = '🚫 Sin intentos - Dilema bloqueado';
+    el.classList.add('agotados');
+  } else {
+    el.textContent = `🎯 Intentos restantes: ${restantes} de ${MAX_INTENTOS_M4}`;
+    el.classList.remove('agotados');
+  }
+}
+
+function bloquearDecisionesDilema(idx) {
+  const cont = document.getElementById('decisiones-' + idx);
+  const botones = cont.querySelectorAll('.decision');
+  botones.forEach(b => {
+    b.classList.add('bloqueada');
+    b.disabled = true;
+    b.onclick = null;
+  });
+}
+
 function seleccionarDecision(dilemaIdx, decisionIdx) {
+  const info = intentosDilemas[dilemaIdx];
+  if (info.completado || info.usados >= MAX_INTENTOS_M4) return;
+  
   const dilema = document.getElementById('dilema-' + dilemaIdx);
-  if (dilema.dataset.completado) return;
+  const contDecisiones = document.getElementById('decisiones-' + dilemaIdx);
+  const botones = contDecisiones.querySelectorAll('.decision');
   const dec = dilemas[dilemaIdx].decisiones[decisionIdx];
-  const botones = dilema.querySelectorAll('.decision');
+  
+  info.usados++;
+  
   botones[decisionIdx].classList.add(dec.buena ? 'elegida-buena' : 'elegida-mala');
+  
   const retro = document.getElementById('retro-' + dilemaIdx);
   retro.textContent = dec.retro;
   retro.className = 'retroalimentacion visible ' + (dec.buena ? 'buena' : 'mala');
+  
   if (dec.buena) {
-    dilema.dataset.completado = 'true';
+    info.completado = true;
     actualizarPuntos(4, 20);
     dilemasCompletados++;
     actualizarProgreso(4, (dilemasCompletados / dilemas.length) * 100);
     notificar('🛡️ ¡Decisión ética correcta! +20 puntos');
-    botones.forEach(b => b.disabled = true);
+    bloquearDecisionesDilema(dilemaIdx);
+    actualizarInfoIntentosDilema(dilemaIdx);
+    
     if (dilemasCompletados === dilemas.length) {
       setTimeout(() => {
         mostrarModal('🏆', '¡DECÁLOGO COMPLETADO!', 'Has demostrado ser un desarrollador con ética y valores. ¡Tu código será tu legado!');
       }, 1500);
     }
   } else {
-    notificar('⚠️ Piensa de nuevo... hay una mejor opción', 'error');
-    setTimeout(() => { botones[decisionIdx].classList.remove('elegida-mala'); }, 2000);
+    notificar(`⚠️ Incorrecto. Intento ${info.usados} de ${MAX_INTENTOS_M4}`, 'error');
+    // Bloquear la opción incorrecta elegida
+    botones[decisionIdx].classList.add('bloqueada');
+    botones[decisionIdx].disabled = true;
+    botones[decisionIdx].onclick = null;
+    
+    actualizarInfoIntentosDilema(dilemaIdx);
+    
+    if (info.usados >= MAX_INTENTOS_M4) {
+      setTimeout(() => {
+        bloquearDecisionesDilema(dilemaIdx);
+        const correctaIdx = dilemas[dilemaIdx].decisiones.findIndex(d => d.buena);
+        retro.innerHTML = `🚫 <strong>Agotaste tus intentos.</strong> La decisión correcta era: "${dilemas[dilemaIdx].decisiones[correctaIdx].texto.replace(/^[^\s]+\s/, '')}". ${dilemas[dilemaIdx].decisiones[correctaIdx].retro}`;
+        retro.className = 'retroalimentacion visible mala';
+        notificar('🚫 Dilema bloqueado. Reflexiona y sigue.', 'error');
+      }, 1000);
+    }
   }
 }
 
