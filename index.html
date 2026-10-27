@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🚀 Código Quest - Taller de Programación</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/fredoka@5.0.0/index.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/space-mono@5.0.0/index.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg-dark: #0a0e27;
+    --bg-purple: #1a1040;
+    --neon-pink: #ff2e93;
+    --neon-cyan: #00f0ff;
+    --neon-yellow: #ffe600;
+    --neon-green: #39ff14;
+    --neon-orange: #ff6b00;
+    --neon-purple: #b537f2;
+    --text-light: #f0f0ff;
+  }
+  body {
+    font-family: 'Fredoka', sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-light);
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image: 
+      radial-gradient(circle at 20% 30%, rgba(181, 55, 242, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(0, 240, 255, 0.15) 0%, transparent 50%);
+  }
+  .code-font { font-family: 'Space Mono', monospace; }
+  #pantalla-inicio {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+  }
+  .estrellas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .estrella {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    animation: titilar 3s infinite;
+  }
+  @keyframes titilar {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+  .titulo-principal {
+    font-size: clamp(2.5rem, 7vw, 5rem);
+    text-align: center;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink), var(--neon-yellow));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 40px rgba(255, 46, 147, 0.5);
+    margin-bottom: 10px;
+    z-index: 1;
+    animation: flotar 3s ease-in-out infinite;
+  }
+  @keyframes flotar {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .subtitulo {
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
+    color: var(--neon-cyan);
+    text-align: center;
+    margin-bottom: 30px;
+    z-index: 1;
+  }
+  .mascota-container {
+    width: clamp(180px, 30vw, 280px);
+    height: clamp(180px, 30vw, 280px);
+    margin: 20px 0;
+    z-index: 1;
+    animation: flotar 4s ease-in-out infinite;
+  }
+  .btn-iniciar {
+    padding: 18px 50px;
+    font-size: 1.5rem;
+    font-family: 'Fredoka', sans-serif;
+    background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 0 30px rgba(255, 46, 147, 0.6);
+    transition: all 0.3s;
+    z-index: 1;
+    font-weight: bold;
+  }
+  .btn-iniciar:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 50px rgba(255, 46, 147, 0.9);
+  }
+  #menu-modulos {
+    display: none;
+    padding: 30px 20px;
+    min-height: 100vh;
+  }
+  .header-juego {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 25px;
+    background: rgba(26, 16, 64, 0.8);
+    border-radius: 20px;
+    margin-bottom: 30px;
+    border: 2px solid var(--neon-cyan);
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .puntos-totales {
+    font-size: 1.3rem;
+    color: var(--neon-yellow);
+    font-weight: bold;
+  }
+  .puntos-totales span { color: var(--neon-green); }
+  .titulo-menu {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 30px;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+  }
+  .grid-modulos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    max-width: 1300px;
+    margin: 0 auto;
+  }
+  .tarjeta-modulo {
+    background: linear-gradient(135deg, rgba(26, 16, 64, 0.9), rgba(10, 14, 39, 0.9));
+    border: 3px solid;
+    border-radius: 20px;
+    padding: 25px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .tarjeta-modulo::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle, currentColor 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .tarjeta-modulo:hover::before { opacity: 0.1; }
+  .tarjeta-modulo:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  }
+  .tarjeta-modulo.m1 { border-color: var(--neon-pink); color: var(--neon-pink); }
+  .tarjeta-modulo.m2 { border-color: var(--neon-cyan); color: var(--neon-cyan); }
+  .tarjeta-modulo.m3 { border-color: var(--neon-green); color: var(--neon-green); }
+  .tarjeta-modulo.m4 { border-color: var(--neon-orange); color: var(--neon-orange); }
+  .icono-modulo {
+    font-size: 4rem;
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  .titulo-modulo {
+    font-size: 1.5rem;
+    color: white;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  .desc-modulo {
+    color: #b0b0d0;
+    text-align: center;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  .progreso-modulo {
+    margin-top: 15px;
+    height: 8px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .barra-progreso {
+    height: 100%;
+    background: linear-gradient(90deg, currentColor, white);
+    transition: width 0.5s;
+  }
+  .modulo-pantalla {
+    display: none;
+    padding: 20px;
+    min-height: 100vh;
+  }
+  .btn-volver {
+    background: rgba(255,255,255,0.1);
+    border: 2px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    padding: 10px 20px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1rem;
+    transition: all 0.3s;
+  }
+  .btn-volver:hover {
+    background: var(--neon-cyan);
+    color: var(--bg-dark);
+  }
+  .pacman-container {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .pacman-info {
+    background: rgba(26, 16, 64, 0.8);
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    border: 2px solid var(--neon-pink);
+  }
+  .pregunta-actual {
+    font-size: 1.3rem;
+    margin: 10px 0;
+    color: var(--neon-yellow);
+  }
+  .stats-pacman {
+    display: flex;
+    justify-content: space-around;
+    margin: 15px 0;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .stat-item {
+    background: rgba(0,0,0,0.4);
+    padding: 10px 20px;
+    border-radius: 15px;
+    font-size: 1.1rem;
+  }
+  #canvas-pacman {
+    background: #000;
+    border: 4px solid var(--neon-pink);
+    border-radius: 10px;
+    box-shadow: 0 0 30px rgba(255, 46, 147, 0.5);
+    max-width: 100%;
+    touch-action: none;
+  }
+  .controles-moviles {
+    display: none;
+    margin-top: 15px;
+    grid-template-columns: repeat(3, 60px);
+    grid-template-rows: repeat(3, 60px);
+    gap: 5px;
+    justify-content: center;
+  }
+  .btn-dir {
+    background: var(--neon-pink);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+  .btn-dir:active { transform: scale(0.9); }
+  .btn-arriba { grid-column: 2; grid-row: 1; }
+  .btn-izq { grid-column: 1; grid-row: 2; }
+  .btn-abajo { grid-column: 2; grid-row: 3; }
+  .btn-der { grid-column: 3; grid-row: 2; }
+  @media (max-width: 768px) {
+    .controles-moviles { display: grid; }
+  }
+  .versiones-container {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .panel-versiones {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 20px;
+  }
+  @media (max-width: 900px) {
+    .panel-versiones { grid-template-columns: 1fr; }
+  }
+  .panel-caja {
+    background: rgba(26, 16, 64, 0.8);
+    border: 2px solid var(--neon-cyan);
+    border-radius: 15px;
+    padding: 20px;
+  }
+  .panel-titulo {
+    color: var(--neon-cyan);
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+  }
+  .arbol-versiones {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 20px 10px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 10px;
+    min-height: 100px;
+  }
+  .nodo-commit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: aparecer 0.5s;
+  }
+  @keyframes aparecer {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .circulo-commit {
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+  }
+  .circulo-commit.activo {
+    background: linear-gradient(135deg, var(--neon-yellow), var(--neon-orange));
+    animation: pulsar 1s infinite;
+  }
+  @keyframes pulsar {
+    0%, 100% { box-shadow: 0 0 20px rgba(255, 230, 0, 0.5); }
+    50% { box-shadow: 0 0 40px rgba(255, 230, 0, 1); }
+  }
+  .linea-commit {
+    width: 30px; height: 3px;
+    background: var(--neon-cyan);
+  }
+  .codigo-display {
+    background: #000;
+    border-radius: 10px;
+    padding: 15px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--neon-green);
+    min-height: 200px;
+    overflow-x: auto;
+  }
+  .linea-codigo {
+    padding: 3px 5px;
+    border-radius: 3px;
+  }
+  .linea-codigo.tachada {
+    text-decoration: line-through;
+    color: #666;
+    background: rgba(255, 0, 0, 0.1);
+  }
+  .linea-codigo.nueva {
+    color: var(--neon-yellow);
+    background: rgba(255, 230, 0, 0.1);
+    animation: resaltar 1s;
+  }
+  @keyframes resaltar {
+    from { background: rgba(255, 230, 0, 0.5); }
+    to { background: rgba(255, 230, 0, 0.1); }
+  }
+  .btn-accion {
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1rem;
+    margin: 5px;
+    transition: all 0.3s;
+  }
+  .btn-accion:hover { transform: scale(1.05); }
+  .btn-accion:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .mensaje-commit {
+    background: rgba(0,0,0,0.4);
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: var(--neon-yellow);
+    font-style: italic;
+  }
+  .ecosistema-container {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .escenario {
+    background: rgba(26, 16, 64, 0.8);
+    border: 2px solid var(--neon-green);
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 20px;
+  }
+  .escenario-titulo {
+    color: var(--neon-green);
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+  }
+  .escenario-texto {
+    line-height: 1.6;
+    margin-bottom: 20px;
+    font-size: 1.05rem;
+  }
+  .opciones-lenguaje {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+  }
+  .opcion-lenguaje {
+    background: rgba(0,0,0,0.4);
+    border: 2px solid #444;
+    border-radius: 12px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+  }
+  .opcion-lenguaje:hover {
+    border-color: var(--neon-green);
+    transform: translateY(-3px);
+  }
+  .opcion-lenguaje.correcta {
+    border-color: var(--neon-green);
+    background: rgba(57, 255, 20, 0.2);
+    animation: correcto 0.5s;
+  }
+  .opcion-lenguaje.incorrecta {
+    border-color: #ff3333;
+    background: rgba(255, 0, 0, 0.2);
+    animation: sacudir 0.5s;
+  }
+  @keyframes correcto {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+  @keyframes sacudir {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+  }
+  .nombre-lenguaje {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--neon-green);
+    margin-bottom: 5px;
+  }
+  .desc-lenguaje {
+    font-size: 0.85rem;
+    color: #b0b0d0;
+  }
+  .explicacion {
+    margin-top: 15px;
+    padding: 15px;
+    background: rgba(57, 255, 20, 0.1);
+    border-left: 4px solid var(--neon-green);
+    border-radius: 8px;
+    display: none;
+  }
+  .explicacion.visible { display: block; }
+  
+  /* BIBLIOTECA DE LENGUAJES */
+  .biblioteca-lenguajes {
+    background: rgba(26, 16, 64, 0.6);
+    border: 2px solid var(--neon-purple);
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 30px;
+  }
+  .biblioteca-titulo {
+    color: var(--neon-purple);
+    font-size: 1.8rem;
+    text-align: center;
+    margin-bottom: 10px;
+    text-shadow: 0 0 15px rgba(181, 55, 242, 0.5);
+  }
+  .biblioteca-intro {
+    text-align: center;
+    color: #b0b0d0;
+    margin-bottom: 20px;
+    line-height: 1.6;
+    font-size: 1.05rem;
+  }
+  .grid-lenguajes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+  }
+  .tarjeta-lenguaje {
+    background: linear-gradient(135deg, rgba(10, 14, 39, 0.9), rgba(26, 16, 64, 0.9));
+    border: 2px solid;
+    border-radius: 15px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .tarjeta-lenguaje:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  }
+  .tarjeta-lenguaje.cpp { border-color: #659ad2; }
+  .tarjeta-lenguaje.python { border-color: #ffd43b; }
+  .tarjeta-lenguaje.javascript { border-color: #f7df1e; }
+  .tarjeta-lenguaje.java { border-color: #f89820; }
+  
+  .lenguaje-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .lenguaje-icono {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: white;
+    flex-shrink: 0;
+  }
+  .lenguaje-icono.cpp { background: linear-gradient(135deg, #659ad2, #00599c); }
+  .lenguaje-icono.python { background: linear-gradient(135deg, #ffd43b, #3776ab); }
+  .lenguaje-icono.javascript { background: linear-gradient(135deg, #f7df1e, #323330); }
+  .lenguaje-icono.java { background: linear-gradient(135deg, #f89820, #5382a1); }
+  
+  .lenguaje-nombre {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: white;
+  }
+  .lenguaje-subtitulo {
+    font-size: 0.9rem;
+    color: #b0b0d0;
+    font-style: italic;
+  }
+  
+  .lenguaje-resumen {
+    color: #d0d0e0;
+    line-height: 1.5;
+    margin: 10px 0;
+    font-size: 0.95rem;
+  }
+  
+  .btn-expandir {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid currentColor;
+    color: inherit;
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 0.9rem;
+    margin-top: 10px;
+    transition: all 0.3s;
+    width: 100%;
+  }
+  .btn-expandir:hover {
+    background: rgba(255,255,255,0.2);
+  }
+  
+  .lenguaje-detalle {
+    display: none;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed rgba(255,255,255,0.2);
+    animation: aparecer 0.4s;
+  }
+  .lenguaje-detalle.expandido {
+    display: block;
+  }
+  
+  .detalle-seccion {
+    margin-bottom: 12px;
+  }
+  .detalle-titulo {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .detalle-titulo.usos { color: var(--neon-green); }
+  .detalle-titulo.ejemplos { color: var(--neon-cyan); }
+  .detalle-titulo.ventajas { color: var(--neon-yellow); }
+  .detalle-titulo.desventajas { color: var(--neon-pink); }
+  .detalle-titulo.dato { color: var(--neon-orange); }
+  
+  .detalle-texto {
+    color: #c0c0d0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    padding-left: 5px;
+  }
+  
+  .etiquetas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 5px;
+  }
+  .etiqueta {
+    background: rgba(255,255,255,0.1);
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    color: #e0e0f0;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  
+  .etica-container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .dilema {
+    background: rgba(26, 16, 64, 0.8);
+    border: 2px solid var(--neon-orange);
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 20px;
+  }
+  .dilema-titulo {
+    color: var(--neon-orange);
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+  }
+  .dilema-texto {
+    line-height: 1.6;
+    margin-bottom: 20px;
+    font-size: 1.05rem;
+    padding: 15px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 10px;
+  }
+  .decisiones {
+    display: grid;
+    gap: 12px;
+  }
+  .decision {
+    background: rgba(0,0,0,0.4);
+    border: 2px solid #555;
+    border-radius: 10px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: left;
+    font-family: 'Fredoka', sans-serif;
+    color: white;
+    font-size: 1rem;
+  }
+  .decision:hover {
+    border-color: var(--neon-orange);
+    background: rgba(255, 107, 0, 0.1);
+  }
+  .decision.elegida-buena {
+    border-color: var(--neon-green);
+    background: rgba(57, 255, 20, 0.2);
+  }
+  .decision.elegida-mala {
+    border-color: #ff3333;
+    background: rgba(255, 0, 0, 0.2);
+  }
+  .retroalimentacion {
+    margin-top: 15px;
+    padding: 15px;
+    border-radius: 10px;
+    display: none;
+    line-height: 1.5;
+  }
+  .retroalimentacion.visible { display: block; }
+  .retroalimentacion.buena {
+    background: rgba(57, 255, 20, 0.1);
+    border-left: 4px solid var(--neon-green);
+  }
+  .retroalimentacion.mala {
+    background: rgba(255, 0, 0, 0.1);
+    border-left: 4px solid #ff3333;
+  }
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8);
+    z-index: 100;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  .modal.visible { display: flex; }
+  .modal-contenido {
+    background: linear-gradient(135deg, var(--bg-purple), var(--bg-dark));
+    border: 3px solid var(--neon-cyan);
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 500px;
+    text-align: center;
+    animation: aparecer 0.5s;
+  }
+  .modal-icono {
+    font-size: 5rem;
+    margin-bottom: 15px;
+  }
+  .modal-titulo {
+    font-size: 2rem;
+    color: var(--neon-yellow);
+    margin-bottom: 15px;
+  }
+  .modal-texto {
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .notificacion {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, var(--neon-green), var(--neon-cyan));
+    color: var(--bg-dark);
+    padding: 15px 25px;
+    border-radius: 15px;
+    font-weight: bold;
+    z-index: 200;
+    animation: deslizar 0.5s;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+  }
+  .notificacion.error {
+    background: linear-gradient(135deg, #ff3333, var(--neon-orange));
+    color: white;
+  }
+  @keyframes deslizar {
+    from { transform: translateX(400px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  .info-box {
+    background: rgba(0, 240, 255, 0.1);
+    border-left: 4px solid var(--neon-cyan);
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+    line-height: 1.6;
+  }
+  .info-box strong { color: var(--neon-yellow); }
+</style>
+</head>
+<body>
+
+<div class="estrellas" id="estrellas"></div>
+
+<div id="pantalla-inicio">
+  <div class="mascota-container">
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <rect x="50" y="70" width="100" height="90" rx="15" fill="#4a90e2" stroke="#00f0ff" stroke-width="3"/>
+      <rect x="55" y="30" width="90" height="50" rx="12" fill="#5a9ff2" stroke="#00f0ff" stroke-width="3"/>
+      <line x1="100" y1="30" x2="100" y2="15" stroke="#00f0ff" stroke-width="3"/>
+      <circle cx="100" cy="12" r="5" fill="#ff2e93">
+        <animate attributeName="fill" values="#ff2e93;#ffe600;#ff2e93" dur="1s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="78" cy="55" r="8" fill="white"/>
+      <circle cx="122" cy="55" r="8" fill="white"/>
+      <circle cx="78" cy="55" r="4" fill="#0a0e27">
+        <animate attributeName="cx" values="78;80;78;76;78" dur="3s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="122" cy="55" r="4" fill="#0a0e27">
+        <animate attributeName="cx" values="122;124;122;120;122" dur="3s" repeatCount="indefinite"/>
+      </circle>
+      <path d="M 80 68 Q 100 78 120 68" stroke="#0a0e27" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <rect x="70" y="90" width="60" height="35" rx="5" fill="#0a0e27" stroke="#00f0ff" stroke-width="2"/>
+      <text x="100" y="112" text-anchor="middle" fill="#39ff14" font-family="monospace" font-size="14" font-weight="bold">&lt;/&gt;</text>
+      <rect x="30" y="85" width="20" height="50" rx="10" fill="#4a90e2" stroke="#00f0ff" stroke-width="2"/>
+      <rect x="150" y="85" width="20" height="50" rx="10" fill="#4a90e2" stroke="#00f0ff" stroke-width="2"/>
+      <rect x="65" y="160" width="20" height="30" rx="5" fill="#4a90e2" stroke="#00f0ff" stroke-width="2"/>
+      <rect x="115" y="160" width="20" height="30" rx="5" fill="#4a90e2" stroke="#00f0ff" stroke-width="2"/>
+    </svg>
+  </div>
+  <h1 class="titulo-principal">🚀 CÓDIGO QUEST</h1>
+  <p class="subtitulo">¡Aventura interactiva de programación para jóvenes genios!</p>
+  <button class="btn-iniciar" onclick="iniciarJuego()">🎮 ¡COMENZAR AVENTURA!</button>
+</div>
+
+<div id="menu-modulos">
+  <div class="header-juego">
+    <button class="btn-volver" onclick="volverInicio()">🏠 Inicio</button>
+    <div class="puntos-totales">⭐ Puntos: <span id="puntos-total">0</span></div>
+    <div class="puntos-totales">🏆 Módulo: <span id="modulo-actual">-</span></div>
+  </div>
+  <h2 class="titulo-menu">🗺️ Elige tu Misión</h2>
+  <div class="grid-modulos">
+    <div class="tarjeta-modulo m1" onclick="abrirModulo(1)">
+      <div class="icono-modulo">👾</div>
+      <h3 class="titulo-modulo">Misión 1: El Laberinto Binario</h3>
+      <p class="desc-modulo">¡Come solo las respuestas correctas en este laberinto estilo arcade! Aprende sobre sistemas numéricos y traducción de código.</p>
+      <div class="progreso-modulo"><div class="barra-progreso" id="progreso-1" style="width: 0%"></div></div>
+    </div>
+    <div class="tarjeta-modulo m2" onclick="abrirModulo(2)">
+      <div class="icono-modulo">🌳</div>
+      <h3 class="titulo-modulo">Misión 2: La Máquina del Tiempo</h3>
+      <p class="desc-modulo">Viaja a través de los commits y construye el árbol de versiones de un proyecto. ¡La historia del código importa!</p>
+      <div class="progreso-modulo"><div class="barra-progreso" id="progreso-2" style="width: 0%"></div></div>
+    </div>
+    <div class="tarjeta-modulo m3" onclick="abrirModulo(3)">
+      <div class="icono-modulo">🌎</div>
+      <h3 class="titulo-modulo">Misión 3: El Mapa Tecnológico</h3>
+      <p class="desc-modulo">Descubre qué lenguaje de programación usa cada empresa en Latinoamérica y por qué. ¡Tú decides!</p>
+      <div class="progreso-modulo"><div class="barra-progreso" id="progreso-3" style="width: 0%"></div></div>
+    </div>
+    <div class="tarjeta-modulo m4" onclick="abrirModulo(4)">
+      <div class="icono-modulo">🛡️</div>
+      <h3 class="titulo-modulo">Misión 4: El Escudo del Héroe</h3>
+      <p class="desc-modulo">Enfrenta dilemas éticos reales y construye tu propio decálogo como desarrollador responsable.</p>
+      <div class="progreso-modulo"><div class="barra-progreso" id="progreso-4" style="width: 0%"></div></div>
+    </div>
+  </div>
+</div>
+
+<div id="modulo-1" class="modulo-pantalla">
+  <div class="header-juego">
+    <button class="btn-volver" onclick="volverMenu()">← Volver</button>
+    <div class="puntos-totales">⭐ <span id="puntos-m1">0</span></div>
+  </div>
+  <div class="pacman-container">
+    <div class="pacman-info">
+      <h2 style="color: var(--neon-pink); margin-bottom: 10px;">👾 MISIÓN 1: EL LABERINTO BINARIO</h2>
+      <div class="info-box">
+        <strong>📚 Recuerda:</strong> Las computadoras solo entienden <strong>ceros y unos</strong> (sistema binario). El hexadecimal es una forma corta de escribir binario. Y para que la máquina entienda tu código, un <strong>compilador</strong> lo traduce.
+      </div>
+      <div class="pregunta-actual" id="pregunta-pacman">Cargando pregunta...</div>
+      <div class="stats-pacman">
+        <div class="stat-item">❤️ Vidas: <span id="vidas">3</span></div>
+        <div class="stat-item">🎯 Nivel: <span id="nivel">1</span>/8</div>
+        <div class="stat-item">✅ Correctas: <span id="correctas">0</span></div>
+      </div>
+    </div>
+    <canvas id="canvas-pacman" width="600" height="600"></canvas>
+    <div class="controles-moviles">
+      <button class="btn-dir btn-arriba" onclick="cambiarDireccion(0,-1)">▲</button>
+      <button class="btn-dir btn-izq" onclick="cambiarDireccion(-1,0)">◀</button>
+      <button class="btn-dir btn-abajo" onclick="cambiarDireccion(0,1)">▼</button>
+      <button class="btn-dir btn-der" onclick="cambiarDireccion(1,0)">▶</button>
+    </div>
+    <p style="margin-top: 15px; color: #aaa;">⌨️ Usa las flechas del teclado para mover a Code-Man</p>
+  </div>
+</div>
+
+<div id="modulo-2" class="modulo-pantalla">
+  <div class="header-juego">
+    <button class="btn-volver" onclick="volverMenu()">← Volver</button>
+    <div class="puntos-totales">⭐ <span id="puntos-m2">0</span></div>
+  </div>
+  <div class="versiones-container">
+    <h2 style="color: var(--neon-cyan); text-align: center; margin-bottom: 10px;">🌳 MISIÓN 2: LA MÁQUINA DEL TIEMPO</h2>
+    <div class="info-box">
+      <strong>📚 ¿Qué es un commit?</strong> Es como guardar una foto del código en un momento específico. Si algo sale mal, puedes volver atrás. ¡Nunca uses corrector líquido, la historia debe verse!
+    </div>
+    <div class="panel-versiones">
+      <div class="panel-caja">
+        <h3 class="panel-titulo">📊 Árbol de Versiones</h3>
+        <div class="arbol-versiones" id="arbol-versiones"></div>
+        <div class="mensaje-commit" id="mensaje-commit">Haz clic en "Siguiente Commit" para comenzar</div>
+      </div>
+      <div class="panel-caja">
+        <h3 class="panel-titulo">💻 Código del Proyecto</h3>
+        <div class="codigo-display" id="codigo-display"></div>
+        <div style="margin-top: 15px; text-align: center;">
+          <button class="btn-accion" id="btn-siguiente-commit" onclick="siguienteCommit()">⏭️ Siguiente Commit</button>
+          <button class="btn-accion" onclick="reiniciarModulo2()">🔄 Reiniciar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modulo-3" class="modulo-pantalla">
+  <div class="header-juego">
+    <button class="btn-volver" onclick="volverMenu()">← Volver</button>
+    <div class="puntos-totales">⭐ <span id="puntos-m3">0</span></div>
+  </div>
+  <div class="ecosistema-container">
+    <h2 style="color: var(--neon-green); text-align: center; margin-bottom: 10px;">🌎 MISIÓN 3: EL MAPA TECNOLÓGICO</h2>
+    
+    <!-- BIBLIOTECA DE LENGUAJES -->
+    <div class="biblioteca-lenguajes">
+      <h3 class="biblioteca-titulo">📚 Biblioteca de Lenguajes</h3>
+      <p class="biblioteca-intro">
+        Antes de enfrentar los desafíos, conoce a los protagonistas del mundo de la programación. 
+        Cada lenguaje tiene su propia personalidad, fortalezas y lugares donde brilla más. 
+        ¡Haz clic en cada tarjeta para leer su historia completa!
+      </p>
+      <div class="grid-lenguajes" id="grid-lenguajes"></div>
+    </div>
+    
+    <div class="info-box">
+      <strong>📚 Elige sabiamente:</strong> Ahora que conoces a los lenguajes, descubre cuál es el mejor para cada situación real en Latinoamérica. ¡Tu decisión importa!
+    </div>
+    <div id="contenedor-escenarios"></div>
+  </div>
+</div>
+
+<div id="modulo-4" class="modulo-pantalla">
+  <div class="header-juego">
+    <button class="btn-volver" onclick="volverMenu()">← Volver</button>
+    <div class="puntos-totales">⭐ <span id="puntos-m4">0</span></div>
+  </div>
+  <div class="etica-container">
+    <h2 style="color: var(--neon-orange); text-align: center; margin-bottom: 10px;">🛡️ MISIÓN 4: EL ESCUDO DEL HÉROE</h2>
+    <div class="info-box">
+      <strong>📚 Ser desarrollador es un superpoder:</strong> Con grandes poderes vienen grandes responsabilidades. Tus decisiones afectan a miles de personas. ¡Aprende a tomar decisiones éticas!
+    </div>
+    <div id="contenedor-dilemas"></div>
+  </div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-contenido">
+    <div class="modal-icono" id="modal-icono">🎉</div>
+    <h2 class="modal-titulo" id="modal-titulo">¡Felicidades!</h2>
+    <p class="modal-texto" id="modal-texto">Has completado la misión</p>
+    <button class="btn-iniciar" onclick="cerrarModal()">Continuar</button>
+  </div>
+</div>
+
+<script>
+let puntosTotal = 0;
+let puntosModulos = {1: 0, 2: 0, 3: 0, 4: 0};
+let progresoModulos = {1: 0, 2: 0, 3: 0, 4: 0};
+
+function crearEstrellas() {
+  const cont = document.getElementById('estrellas');
+  for (let i = 0; i < 80; i++) {
+    const e = document.createElement('div');
+    e.className = 'estrella';
+    const size = Math.random() * 3 + 1;
+    e.style.width = size + 'px';
+    e.style.height = size + 'px';
+    e.style.left = Math.random() * 100 + '%';
+    e.style.top = Math.random() * 100 + '%';
+    e.style.animationDelay = Math.random() * 3 + 's';
+    cont.appendChild(e);
+  }
+}
+crearEstrellas();
+
+function iniciarJuego() {
+  document.getElementById('pantalla-inicio').style.display = 'none';
+  document.getElementById('menu-modulos').style.display = 'block';
+}
+function volverInicio() {
+  document.getElementById('pantalla-inicio').style.display = 'flex';
+  document.getElementById('menu-modulos').style.display = 'none';
+  ocultarTodosModulos();
+}
+function volverMenu() {
+  ocultarTodosModulos();
+  document.getElementById('menu-modulos').style.display = 'block';
+  if (pacmanAnim) cancelAnimationFrame(pacmanAnim);
+}
+function ocultarTodosModulos() {
+  for (let i = 1; i <= 4; i++) {
+    document.getElementById('modulo-' + i).style.display = 'none';
+  }
+}
+function abrirModulo(num) {
+  ocultarTodosModulos();
+  document.getElementById('modulo-' + num).style.display = 'block';
+  document.getElementById('modulo-actual').textContent = num;
+  if (num === 1) iniciarPacman();
+  if (num === 2) iniciarModulo2();
+  if (num === 3) iniciarModulo3();
+  if (num === 4) iniciarModulo4();
+}
+
+function notificar(mensaje, tipo = 'exito') {
+  const n = document.createElement('div');
+  n.className = 'notificacion' + (tipo === 'error' ? ' error' : '');
+  n.textContent = mensaje;
+  document.body.appendChild(n);
+  setTimeout(() => n.remove(), 2500);
+}
+function actualizarPuntos(modulo, puntos) {
+  puntosModulos[modulo] += puntos;
+  puntosTotal += puntos;
+  document.getElementById('puntos-total').textContent = puntosTotal;
+  const el = document.getElementById('puntos-m' + modulo);
+  if (el) el.textContent = puntosModulos[modulo];
+}
+function actualizarProgreso(modulo, porcentaje) {
+  progresoModulos[modulo] = Math.min(100, porcentaje);
+  const el = document.getElementById('progreso-' + modulo);
+  if (el) el.style.width = progresoModulos[modulo] + '%';
+}
+
+function mostrarModal(icono, titulo, texto) {
+  document.getElementById('modal-icono').textContent = icono;
+  document.getElementById('modal-titulo').textContent = titulo;
+  document.getElementById('modal-texto').textContent = texto;
+  document.getElementById('modal').classList.add('visible');
+}
+function cerrarModal() {
+  document.getElementById('modal').classList.remove('visible');
+}
+
+// ============ MÓDULO 1: PAC-MAN ============
+const canvas = document.getElementById('canvas-pacman');
+const ctx = canvas.getContext('2d');
+const TAM_CELDA = 30;
+const COLS = 20;
+const FILAS = 20;
+
+const PASOS_POR_MOVIMIENTO = 27;
+let frameCount = 0;
+
+const HISTORIAL_MAX = 8;
+const LIMITE_REPETICION_ZONA = 2;
+
+const mapaBase = [
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+  [1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1],
+  [1,0,1,1,1,0,1,1,0,0,0,0,1,1,0,1,1,1,0,1],
+  [1,0,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,1],
+  [1,0,1,0,1,1,1,0,1,1,1,1,0,1,1,1,0,1,0,1],
+  [1,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,1],
+  [1,1,1,0,1,0,1,1,1,0,0,1,1,1,0,1,0,1,1,1],
+  [1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1],
+  [1,0,1,1,1,0,1,0,1,1,1,1,0,1,0,1,1,1,0,1],
+  [1,0,0,0,0,0,1,0,1,0,0,1,0,1,0,0,0,0,0,1],
+  [1,0,1,1,1,0,1,0,1,0,0,1,0,1,0,1,1,1,0,1],
+  [1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1],
+  [1,1,1,0,1,0,1,1,1,0,0,1,1,1,0,1,0,1,1,1],
+  [1,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,1],
+  [1,0,1,0,1,1,1,0,1,1,1,1,0,1,1,1,0,1,0,1],
+  [1,0,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,1],
+  [1,0,1,1,1,0,1,1,0,0,0,0,1,1,0,1,1,1,0,1],
+  [1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1],
+  [1,0,1,0,1,0,1,0,0,0,0,0,0,1,0,1,0,1,0,1],
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+];
+
+const preguntasPacman = [
+  { pregunta: "¿En qué sistema numérico solo existen el 0 y el 1?", opciones: ["Binario", "Decimal", "Hexadecimal", "Romano"], correcta: 0 },
+  { pregunta: "¿Cuántos bits tiene un byte?", opciones: ["4 bits", "8 bits", "16 bits", "2 bits"], correcta: 1 },
+  { pregunta: "¿Qué programa traduce TODO tu código a lenguaje máquina de una vez?", opciones: ["Intérprete", "Compilador", "Editor", "Navegador"], correcta: 1 },
+  { pregunta: "El número decimal 10 en binario es...", opciones: ["1010", "1001", "1100", "1111"], correcta: 0 },
+  { pregunta: "¿Qué es el sistema hexadecimal?", opciones: ["Base 10", "Base 2", "Base 16", "Base 8"], correcta: 2 },
+  { pregunta: "¿Cuál es un lenguaje de ALTO nivel?", opciones: ["Ensamblador", "Código máquina", "Python", "Binario puro"], correcta: 2 },
+  { pregunta: "TypeScript se traduce a JavaScript. ¿Cómo se llama ese proceso?", opciones: ["Compilación", "Transpilación", "Interpretación", "Ejecución"], correcta: 1 },
+  { pregunta: "¿Qué representa el valor hexadecimal FF?", opciones: ["Decimal 15", "Decimal 255", "Decimal 100", "Decimal 0"], correcta: 1 }
+];
+
+let pacman = { x: 1, y: 1, dirX: 0, dirY: 0, nextDirX: 0, nextDirY: 0, boca: 0, bocaDir: 1 };
+let fantasmas = [];
+let pills = [];
+let preguntaActual = 0;
+let vidas = 3;
+let correctas = 0;
+let pacmanAnim = null;
+let juegoActivo = false;
+let mapa = [];
+
+function crearFantasma(x, y, color) {
+  return { x, y, dirX: 0, dirY: 0, color, historial: [], contadorZona: 0, ultimaCelda: null, pasosEnRuta: 0 };
+}
+
+function iniciarPacman() {
+  preguntaActual = 0;
+  vidas = 3;
+  correctas = 0;
+  frameCount = 0;
+  document.getElementById('vidas').textContent = vidas;
+  document.getElementById('nivel').textContent = 1;
+  document.getElementById('correctas').textContent = 0;
+  cargarNivel();
+}
+
+function cargarNivel() {
+  if (preguntaActual >= preguntasPacman.length) {
+    juegoActivo = false;
+    if (pacmanAnim) cancelAnimationFrame(pacmanAnim);
+    actualizarProgreso(1, 100);
+    mostrarModal('🏆', '¡MISIÓN COMPLETADA!', 'Completaste el laberinto binario con ' + correctas + ' respuestas correctas. ¡Eres un genio del código!');
+    return;
+  }
+  
+  mapa = mapaBase.map(fila => [...fila]);
+  pacman.x = 1; pacman.y = 1;
+  pacman.dirX = 0; pacman.dirY = 0;
+  pacman.nextDirX = 0; pacman.nextDirY = 0;
+  
+  fantasmas = [
+    crearFantasma(18, 1, '#ff2e93'),
+    crearFantasma(1, 18, '#00f0ff'),
+    crearFantasma(18, 18, '#ff6b00')
+  ];
+  fantasmas[0].dirX = -1;
+  fantasmas[1].dirX = 1;
+  fantasmas[2].dirX = -1;
+  
+  const posicionesValidas = [];
+  for (let y = 0; y < FILAS; y++) {
+    for (let x = 0; x < COLS; x++) {
+      if (mapa[y][x] === 0 && !(x === 1 && y === 1)) {
+        posicionesValidas.push({x, y});
+      }
+    }
+  }
+  
+  pills = [];
+  const usadas = new Set();
+  const pregunta = preguntasPacman[preguntaActual];
+  
+  for (let i = 0; i < 4; i++) {
+    let pos;
+    let intentos = 0;
+    do {
+      pos = posicionesValidas[Math.floor(Math.random() * posicionesValidas.length)];
+      intentos++;
+    } while (usadas.has(pos.x + ',' + pos.y) && intentos < 50);
+    usadas.add(pos.x + ',' + pos.y);
+    pills.push({ x: pos.x, y: pos.y, texto: pregunta.opciones[i], esCorrecta: i === pregunta.correcta, comida: false });
+  }
+  
+  document.getElementById('pregunta-pacman').textContent = '🎯 ' + pregunta.pregunta;
+  document.getElementById('nivel').textContent = (preguntaActual + 1);
+  actualizarProgreso(1, (preguntaActual / preguntasPacman.length) * 100);
+  
+  juegoActivo = true;
+  if (pacmanAnim) cancelAnimationFrame(pacmanAnim);
+  loopPacman();
+}
+
+function cambiarDireccion(dx, dy) {
+  pacman.nextDirX = dx;
+  pacman.nextDirY = dy;
+}
+
+document.addEventListener('keydown', (e) => {
+  if (!juegoActivo) return;
+  if (e.key === 'ArrowUp') { pacman.nextDirX = 0; pacman.nextDirY = -1; e.preventDefault(); }
+  if (e.key === 'ArrowDown') { pacman.nextDirX = 0; pacman.nextDirY = 1; e.preventDefault(); }
+  if (e.key === 'ArrowLeft') { pacman.nextDirX = -1; pacman.nextDirY = 0; e.preventDefault(); }
+  if (e.key === 'ArrowRight') { pacman.nextDirX = 1; pacman.nextDirY = 0; e.preventDefault(); }
+});
+
+function puedeMoverse(x, y) {
+  if (x < 0 || x >= COLS || y < 0 || y >= FILAS) return false;
+  return mapa[y][x] !== 1;
+}
+
+function obtenerDireccionesValidas(x, y) {
+  const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+  return dirs.filter(d => puedeMoverse(x + d[0], y + d[1]));
+}
+
+function moverFantasma(f) {
+  const posicionActual = f.x + ',' + f.y;
+  f.historial.push(posicionActual);
+  if (f.historial.length > HISTORIAL_MAX) f.historial.shift();
+  
+  const vecesEnZona = f.historial.filter(p => p === posicionActual).length;
+  
+  if (vecesEnZona >= LIMITE_REPETICION_ZONA) {
+    const dirsValidas = obtenerDireccionesValidas(f.x, f.y);
+    const dirsFiltradas = dirsValidas.filter(d => !(d[0] === -f.dirX && d[1] === -f.dirY));
+    const opciones = dirsFiltradas.length > 0 ? dirsFiltradas : dirsValidas;
+    if (opciones.length > 0) {
+      const nuevaDir = opciones[Math.floor(Math.random() * opciones.length)];
+      f.dirX = nuevaDir[0];
+      f.dirY = nuevaDir[1];
+      f.historial = [posicionActual];
+      f.pasosEnRuta = 0;
+    }
+  } else {
+    if (Math.random() < 0.25) {
+      const dirsValidas = obtenerDireccionesValidas(f.x, f.y);
+      const dirsFiltradas = dirsValidas.filter(d => !(d[0] === -f.dirX && d[1] === -f.dirY));
+      const opciones = dirsFiltradas.length > 0 ? dirsFiltradas : dirsValidas;
+      if (opciones.length > 0) {
+        const nuevaDir = opciones[Math.floor(Math.random() * opciones.length)];
+        f.dirX = nuevaDir[0];
+        f.dirY = nuevaDir[1];
+      }
+    }
+  }
+  
+  if (puedeMoverse(f.x + f.dirX, f.y + f.dirY)) {
+    f.x += f.dirX;
+    f.y += f.dirY;
+    f.pasosEnRuta++;
+  } else {
+    f.dirX *= -1;
+    f.dirY *= -1;
+  }
+}
+
+function loopPacman() {
+  if (!juegoActivo) return;
+  frameCount++;
+  pacman.boca += 0.15 * pacman.bocaDir;
+  if (pacman.boca > 0.5 || pacman.boca < 0) pacman.bocaDir *= -1;
+  
+  const debeMoverse = (frameCount % PASOS_POR_MOVIMIENTO) === 0;
+  
+  if (debeMoverse) {
+    const nuevoX = pacman.x + pacman.nextDirX;
+    const nuevoY = pacman.y + pacman.nextDirY;
+    if (puedeMoverse(nuevoX, nuevoY)) {
+      pacman.dirX = pacman.nextDirX;
+      pacman.dirY = pacman.nextDirY;
+    }
+    
+    const sigX = pacman.x + pacman.dirX;
+    const sigY = pacman.y + pacman.dirY;
+    if (puedeMoverse(sigX, sigY)) {
+      pacman.x = sigX;
+      pacman.y = sigY;
+    }
+    
+    fantasmas.forEach(f => moverFantasma(f));
+    
+    pills.forEach(p => {
+      if (!p.comida && p.x === pacman.x && p.y === pacman.y) {
+        p.comida = true;
+        if (p.esCorrecta) {
+          notificar('✅ ¡CORRECTO! +10 puntos');
+          actualizarPuntos(1, 10);
+          correctas++;
+          document.getElementById('correctas').textContent = correctas;
+          preguntaActual++;
+          setTimeout(cargarNivel, 800);
+        } else {
+          notificar('❌ ¡Respuesta incorrecta! -1 vida', 'error');
+          vidas--;
+          document.getElementById('vidas').textContent = vidas;
+          if (vidas <= 0) {
+            juegoActivo = false;
+            mostrarModal('💀', '¡Game Over!', 'Perdiste todas tus vidas. Respuestas correctas: ' + correctas + '. ¡Inténtalo de nuevo!');
+            actualizarProgreso(1, (preguntaActual / preguntasPacman.length) * 100);
+          }
+        }
+      }
+    });
+    
+    fantasmas.forEach(f => {
+      if (f.x === pacman.x && f.y === pacman.y) {
+        vidas--;
+        document.getElementById('vidas').textContent = vidas;
+        notificar('👻 ¡Te atrapó un bug! -1 vida', 'error');
+        pacman.x = 1; pacman.y = 1;
+        pacman.dirX = 0; pacman.dirY = 0;
+        if (vidas <= 0) {
+          juegoActivo = false;
+          mostrarModal('💀', '¡Game Over!', 'Los bugs ganaron. ¡Vuelve a intentarlo!');
+        }
+      }
+    });
+  }
+  
+  dibujar();
+  pacmanAnim = requestAnimationFrame(loopPacman);
+}
+
+function dibujar() {
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  for (let y = 0; y < FILAS; y++) {
+    for (let x = 0; x < COLS; x++) {
+      if (mapa[y][x] === 1) {
+        ctx.fillStyle = '#1a1040';
+        ctx.fillRect(x * TAM_CELDA, y * TAM_CELDA, TAM_CELDA, TAM_CELDA);
+        ctx.strokeStyle = '#b537f2';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x * TAM_CELDA + 2, y * TAM_CELDA + 2, TAM_CELDA - 4, TAM_CELDA - 4);
+      }
+    }
+  }
+  
+  pills.forEach(p => {
+    if (p.comida) return;
+    const cx = p.x * TAM_CELDA + TAM_CELDA / 2;
+    const cy = p.y * TAM_CELDA + TAM_CELDA / 2;
+    const color = p.esCorrecta ? '#39ff14' : '#ff2e93';
+    const grad = ctx.createRadialGradient(cx, cy, 2, cx, cy, 15);
+    grad.addColorStop(0, 'white');
+    grad.addColorStop(0.5, color);
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 14, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 14px Fredoka';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const idx = pills.indexOf(p);
+    ctx.fillText((idx + 1), cx, cy);
+  });
+  
+  ctx.fillStyle = 'rgba(0,0,0,0.8)';
+  ctx.fillRect(0, canvas.height - 80, canvas.width, 80);
+  ctx.font = '12px Fredoka';
+  ctx.textAlign = 'left';
+  pills.forEach((p, i) => {
+    const color = p.comida ? '#666' : (p.esCorrecta ? '#39ff14' : '#ff2e93');
+    ctx.fillStyle = color;
+    ctx.fillText((i+1) + '. ' + p.texto, 10, canvas.height - 60 + i * 18);
+  });
+  
+  fantasmas.forEach(f => {
+    const cx = f.x * TAM_CELDA + TAM_CELDA / 2;
+    const cy = f.y * TAM_CELDA + TAM_CELDA / 2;
+    ctx.fillStyle = f.color;
+    ctx.beginPath();
+    ctx.arc(cx, cy - 3, 11, Math.PI, 0);
+    ctx.lineTo(cx + 11, cy + 8);
+    ctx.lineTo(cx + 7, cy + 4);
+    ctx.lineTo(cx + 3, cy + 8);
+    ctx.lineTo(cx - 3, cy + 4);
+    ctx.lineTo(cx - 7, cy + 8);
+    ctx.lineTo(cx - 11, cy + 4);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = 'white';
+    ctx.beginPath();
+    ctx.arc(cx - 4, cy - 4, 3, 0, Math.PI * 2);
+    ctx.arc(cx + 4, cy - 4, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.arc(cx - 4, cy - 4, 1.5, 0, Math.PI * 2);
+    ctx.arc(cx + 4, cy - 4, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  
+  const pcx = pacman.x * TAM_CELDA + TAM_CELDA / 2;
+  const pcy = pacman.y * TAM_CELDA + TAM_CELDA / 2;
+  let angulo = 0;
+  if (pacman.dirX === 1) angulo = 0;
+  else if (pacman.dirX === -1) angulo = Math.PI;
+  else if (pacman.dirY === -1) angulo = -Math.PI / 2;
+  else if (pacman.dirY === 1) angulo = Math.PI / 2;
+  
+  ctx.fillStyle = '#ffe600';
+  ctx.beginPath();
+  ctx.moveTo(pcx, pcy);
+  const bocaAng = pacman.boca * 0.5;
+  ctx.arc(pcx, pcy, 12, angulo + bocaAng, angulo + Math.PI * 2 - bocaAng);
+  ctx.closePath();
+  ctx.fill();
+  
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.arc(pcx + Math.cos(angulo - 0.5) * 5, pcy + Math.sin(angulo - 0.5) * 5, 2, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+// ============ MÓDULO 2: VERSIONES ============
+const commits = [
+  { num: 1, autor: 'Estudiante A', mensaje: 'Versión inicial: algoritmo para calcular utilidad',
+    lineasNuevas: [
+      { num: 1, texto: 'Inicio', tipo: 'nueva' },
+      { num: 2, texto: 'Leer ventas_mensuales', tipo: 'nueva' },
+      { num: 3, texto: 'Leer compras_mensuales', tipo: 'nueva' },
+      { num: 4, texto: 'Leer gastos_operativos', tipo: 'nueva' },
+      { num: 5, texto: 'utilidad = ventas_mensuales - compras_mensuales - gastos_operativos', tipo: 'nueva' }
+    ], lineasTachadas: [] },
+  { num: 2, autor: 'Estudiante B', mensaje: 'Cambio: ahora leemos solo ventas y compras gravadas',
+    lineasNuevas: [
+      { num: 2, texto: 'Leer ventas_gravadas_mes', tipo: 'nueva' },
+      { num: 3, texto: 'Leer compras_gravadas_mes', tipo: 'nueva' }
+    ], lineasTachadas: [2, 3] },
+  { num: 3, autor: 'Estudiante A', mensaje: 'Agregamos condición: si no hay utilidad, no hay impuesto',
+    lineasNuevas: [
+      { num: 6, texto: 'Si utilidad <= 0 entonces', tipo: 'nueva' },
+      { num: 7, texto: '    impuesto = 0', tipo: 'nueva' },
+      { num: 8, texto: 'Sino', tipo: 'nueva' }
+    ], lineasTachadas: [] },
+  { num: 4, autor: 'Estudiante B', mensaje: 'Agregamos cálculo de impuesto escalonado',
+    lineasNuevas: [
+      { num: 9, texto: '    Si utilidad <= 3000 entonces', tipo: 'nueva' },
+      { num: 10, texto: '        impuesto = utilidad * 0.10', tipo: 'nueva' },
+      { num: 11, texto: '    Sino', tipo: 'nueva' },
+      { num: 12, texto: '        impuesto = 300 + (utilidad - 3000) * 0.29', tipo: 'nueva' }
+    ], lineasTachadas: [] },
+  { num: 5, autor: 'Estudiante A', mensaje: 'Cerramos bloques y mostramos resultado final',
+    lineasNuevas: [
+      { num: 13, texto: '    Fin Si', tipo: 'nueva' },
+      { num: 14, texto: 'Fin Si', tipo: 'nueva' },
+      { num: 15, texto: 'Mostrar "Impuesto a pagar: ", impuesto', tipo: 'nueva' }
+    ], lineasTachadas: [] }
+];
+
+let commitActual = 0;
+let lineasActuales = [];
+
+function iniciarModulo2() {
+  commitActual = 0;
+  lineasActuales = [];
+  document.getElementById('arbol-versiones').innerHTML = '';
+  document.getElementById('codigo-display').innerHTML = '<p style="color:#666;">Esperando primer commit...</p>';
+  document.getElementById('mensaje-commit').textContent = 'Haz clic en "Siguiente Commit" para comenzar';
+  document.getElementById('btn-siguiente-commit').disabled = false;
+  actualizarProgreso(2, 0);
+}
+
+function siguienteCommit() {
+  if (commitActual >= commits.length) {
+    mostrarModal('🎉', '¡Árbol Completo!', 'Has construido 5 commits exitosamente. ¡Ahora sabes cómo funciona el control de versiones!');
+    actualizarProgreso(2, 100);
+    document.getElementById('btn-siguiente-commit').disabled = true;
+    return;
+  }
+  const commit = commits[commitActual];
+  commit.lineasTachadas.forEach(num => {
+    const linea = lineasActuales.find(l => l.num === num);
+    if (linea) linea.tipo = 'tachada';
+  });
+  commit.lineasNuevas.forEach(nueva => {
+    const existente = lineasActuales.find(l => l.num === nueva.num);
+    if (existente) { existente.texto = nueva.texto; existente.tipo = 'nueva'; }
+    else { lineasActuales.push({...nueva}); }
+  });
+  lineasActuales.sort((a, b) => a.num - b.num);
+  const arbol = document.getElementById('arbol-versiones');
+  if (commitActual > 0) {
+    const linea = document.createElement('div');
+    linea.className = 'linea-commit';
+    arbol.appendChild(linea);
+  }
+  const nodo = document.createElement('div');
+  nodo.className = 'nodo-commit';
+  nodo.innerHTML = `<div class="circulo-commit activo">C${commit.num}</div><div style="font-size:0.75rem; color:#aaa; margin-top:5px;">${commit.autor.split(' ')[1]}</div>`;
+  arbol.appendChild(nodo);
+  const circulos = arbol.querySelectorAll('.circulo-commit');
+  circulos.forEach((c, i) => { if (i < circulos.length - 1) c.classList.remove('activo'); });
+  const codigo = document.getElementById('codigo-display');
+  codigo.innerHTML = lineasActuales.map(l => `<div class="linea-codigo ${l.tipo}"><span style="color:#666;">${String(l.num).padStart(2,' ')} | </span>${l.texto}</div>`).join('');
+  document.getElementById('mensaje-commit').innerHTML = `<strong>Commit ${commit.num} (${commit.autor}):</strong> ${commit.mensaje}`;
+  actualizarPuntos(2, 10);
+  actualizarProgreso(2, ((commitActual + 1) / commits.length) * 100);
+  commitActual++;
+  notificar('✅ Commit ' + commit.num + ' guardado');
+}
+
+function reiniciarModulo2() {
+  iniciarModulo2();
+  notificar('🔄 Módulo reiniciado');
+}
+
+// ============ MÓDULO 3: ECOSISTEMA ============
+// DATOS DE LA BIBLIOTECA DE LENGUAJES
+const bibliotecaLenguajes = [
+  {
+    id: 'cpp',
+    clase: 'cpp',
+    icono: 'C++',
+    nombre: 'C++',
+    subtitulo: 'El velocista del silicio',
+    resumen: 'Es un lenguaje muy antiguo (de 1985) pero sigue siendo el rey de la velocidad. Permite controlar directamente la memoria del computador, lo que lo hace súper rápido pero también más difícil de aprender.',
+    usos: ['Motores de videojuegos AAA (Unreal Engine)', 'Sistemas operativos (Windows, partes de Linux)', 'Software aeroespacial y de aviones', 'Sistemas bancarios de alta frecuencia', 'Navegadores web (Chrome, Firefox)'],
+    ejemplosLatam: 'En la <strong>Bolsa de Valores de São Paulo (Bovespa)</strong>, Brasil, usan C++ para procesar miles de transacciones por segundo. En <strong>Argentina</strong>, los estudios de videojuegos como Globant lo usan para crear juegos con gráficos impresionantes.',
+    ventajas: ['Velocidad extrema: es de los lenguajes más rápidos que existen', 'Control total del hardware y la memoria', 'Ideal cuando cada milisegundo cuenta'],
+    desventajas: ['Curva de aprendizaje muy alta: es difícil de dominar', 'Se tarda más tiempo en desarrollar programas', 'Un error pequeño puede romper todo el sistema'],
+    datoCurioso: '¡Minecraft original fue escrito en Java, pero su motor de renderizado usa C++ para lograr la velocidad necesaria!'
+  },
+  {
+    id: 'python',
+    clase: 'python',
+    icono: 'Py',
+    nombre: 'Python',
+    subtitulo: 'El amigo de la inteligencia artificial',
+    resumen: 'Es un lenguaje moderno (de 1991) famoso por ser fácil de leer y escribir. Su código parece casi inglés. Es el favorito de los científicos de datos y los expertos en inteligencia artificial.',
+    usos: ['Inteligencia Artificial y Machine Learning', 'Análisis de datos y estadísticas', 'Automatización de tareas repetitivas', 'Desarrollo web (Django, Flask)', 'Ciencia y investigación'],
+    ejemplosLatam: 'En <strong>Chile</strong>, las startups agrotech usan Python para analizar datos del clima y predecir cuándo regar los cultivos. En <strong>Colombia</strong>, los hospitales lo usan para analizar radiografías con IA. En <strong>México</strong>, el gobierno lo usa para procesar datos ciudadanos.',
+    ventajas: ['Muy fácil de aprender: perfecto para principiantes', 'Miles de librerías gratuitas listas para usar', 'Comunidad gigante que siempre ayuda'],
+    desventajas: ['Es más lento que C++ o Java', 'Consume más memoria RAM', 'No es ideal para videojuegos o sistemas críticos'],
+    datoCurioso: '¡Instagram, Netflix y Spotify usan Python en alguna parte de sus sistemas!'
+  },
+  {
+    id: 'javascript',
+    clase: 'javascript',
+    icono: 'JS',
+    nombre: 'JavaScript',
+    subtitulo: 'El rey de la web interactiva',
+    resumen: 'Es el lenguaje que hace que las páginas web cobren vida. Sin él, internet sería solo texto estático. Funciona en cualquier navegador sin instalar nada. ¡Es el lenguaje más popular del mundo!',
+    usos: ['Páginas web interactivas (animaciones, formularios)', 'Aplicaciones web completas (Gmail, Google Maps)', 'Servidores con Node.js', 'Aplicaciones móviles (React Native)', 'Videojuegos en el navegador'],
+    ejemplosLatam: '<strong>MercadoLibre</strong>, el Amazon latinoamericano, usa JavaScript para su página web. En <strong>Brasil</strong>, el portal Gov.br que usan millones de ciudadanos está hecho con JavaScript. En <strong>México</strong>, casi todas las tiendas en línea lo usan.',
+    ventajas: ['Funciona en todos los navegadores sin instalar nada', 'Es el lenguaje más demandado en ofertas de trabajo', 'Sirve para hacer de todo: web, móvil, servidor'],
+    desventajas: ['Fue creado muy rápido en 1995 y tiene algunas rarezas', 'Para proyectos muy grandes puede ser desordenado', 'No es tan rápido como C++ para cálculos pesados'],
+    datoCurioso: '¡JavaScript NO tiene nada que ver con Java! Son lenguajes completamente diferentes, solo comparten el nombre por marketing.'
+  },
+  {
+    id: 'java',
+    clase: 'java',
+    icono: 'Jv',
+    nombre: 'Java',
+    subtitulo: 'El gigante corporativo',
+    resumen: 'Es un lenguaje robusto (de 1995) famoso por su lema "Escribe una vez, ejecuta en cualquier lugar". Gracias a la Máquina Virtual de Java (JVM), el mismo código funciona en Windows, Mac, Linux y celulares Android.',
+    usos: ['Sistemas bancarios y financieros', 'Aplicaciones empresariales grandes', 'Aplicaciones Android', 'Sistemas de reservas y aerolíneas', 'Software corporativo (ERP, CRM)'],
+    ejemplosLatam: '<strong>Bancolombia</strong> y <strong>BBVA México</strong> usan Java para sus sistemas centrales que mueven billones de dólares. En <strong>Perú</strong>, el sistema de la Sunat (impuestos) está hecho en Java. <strong>Android</strong>, el sistema de la mayoría de celulares del mundo, está basado en Java.',
+    ventajas: ['Portabilidad total: funciona en cualquier dispositivo', 'Muy robusto y seguro para proyectos grandes', 'Maneja muchos usuarios al mismo tiempo sin problemas'],
+    desventajas: ['Consume mucha memoria RAM', 'El código es más largo que en Python', 'Las actualizaciones pueden ser lentas'],
+    datoCurioso: '¡Más de 3 mil millones de dispositivos en el mundo ejecutan Java! Desde celulares hasta tarjetas inteligentes y sistemas de navegación de autos.'
+  }
+];
+
+function construirBiblioteca() {
+  const grid = document.getElementById('grid-lenguajes');
+  grid.innerHTML = '';
+  bibliotecaLenguajes.forEach(lang => {
+    const tarjeta = document.createElement('div');
+    tarjeta.className = 'tarjeta-lenguaje ' + lang.clase;
+    tarjeta.innerHTML = `
+      <div class="lenguaje-header">
+        <div class="lenguaje-icono ${lang.clase}">${lang.icono}</div>
+        <div>
+          <div class="lenguaje-nombre">${lang.nombre}</div>
+          <div class="lenguaje-subtitulo">${lang.subtitulo}</div>
+        </div>
+      </div>
+      <p class="lenguaje-resumen">${lang.resumen}</p>
+      <button class="btn-expandir" onclick="toggleDetalle('${lang.id}', this)">📖 Leer historia completa</button>
+      <div class="lenguaje-detalle" id="detalle-${lang.id}">
+        <div class="detalle-seccion">
+          <div class="detalle-titulo usos">🎯 ¿Cuándo se usa?</div>
+          <div class="etiquetas">
+            ${lang.usos.map(u => `<span class="etiqueta">${u}</span>`).join('')}
+          </div>
+        </div>
+        <div class="detalle-seccion">
+          <div class="detalle-titulo ejemplos">🌎 Ejemplos en Latinoamérica</div>
+          <p class="detalle-texto">${lang.ejemplosLatam}</p>
+        </div>
+        <div class="detalle-seccion">
+          <div class="detalle-titulo ventajas">✅ Ventajas</div>
+          <ul class="detalle-texto" style="padding-left: 20px;">
+            ${lang.ventajas.map(v => `<li>${v}</li>`).join('')}
+          </ul>
+        </div>
+        <div class="detalle-seccion">
+          <div class="detalle-titulo desventajas">⚠️ Desventajas</div>
+          <ul class="detalle-texto" style="padding-left: 20px;">
+            ${lang.desventajas.map(d => `<li>${d}</li>`).join('')}
+          </ul>
+        </div>
+        <div class="detalle-seccion">
+          <div class="detalle-titulo dato">💡 Dato curioso</div>
+          <p class="detalle-texto">${lang.datoCurioso}</p>
+        </div>
+      </div>
+    `;
+    grid.appendChild(tarjeta);
+  });
+}
+
+function toggleDetalle(id, btn) {
+  const detalle = document.getElementById('detalle-' + id);
+  if (detalle.classList.contains('expandido')) {
+    detalle.classList.remove('expandido');
+    btn.textContent = '📖 Leer historia completa';
+  } else {
+    detalle.classList.add('expandido');
+    btn.textContent = '🔼 Ocultar detalles';
+  }
+}
+
+const escenarios = [
+  {
+    titulo: '🏦 Escenario 1: Banco Nacional',
+    texto: 'Un gran banco de Colombia necesita un sistema que maneje millones de transacciones por segundo sin fallar. La seguridad y la velocidad son CRÍTICAS. Si el sistema falla, la economía del país se afecta.',
+    opciones: [
+      { nombre: 'Python', desc: 'Rápido de desarrollar, fácil de aprender', correcta: false },
+      { nombre: 'C++', desc: 'Máxima velocidad y control del hardware', correcta: true },
+      { nombre: 'JavaScript', desc: 'Ideal para páginas web', correcta: false },
+      { nombre: 'HTML', desc: 'Para diseñar páginas', correcta: false }
+    ],
+    explicacion: '✅ ¡Correcto! C++ es perfecto porque permite controlar la memoria directamente y ejecutar miles de transacciones por segundo con latencia mínima. Los sistemas de pago como la Bovespa en Brasil usan C++ por esta razón.'
+  },
+  {
+    titulo: '🌱 Escenario 2: Startup Agrotech',
+    texto: 'Una startup en Chile quiere analizar datos del clima y suelo para predecir cuándo regar los cultivos. Necesitan usar inteligencia artificial y lanzar el producto rápido para conseguir inversionistas.',
+    opciones: [
+      { nombre: 'C++', desc: 'Máximo rendimiento', correcta: false },
+      { nombre: 'Ensamblador', desc: 'Control total del hardware', correcta: false },
+      { nombre: 'Python', desc: 'Librerías de IA y desarrollo rápido', correcta: true },
+      { nombre: 'SQL', desc: 'Solo para bases de datos', correcta: false }
+    ],
+    explicacion: '✅ ¡Excelente! Python tiene librerías poderosas de IA como TensorFlow y pandas, y permite prototipar en semanas. Las startups agrotech chilenas lo usan para analizar datos agrícolas.'
+  },
+  {
+    titulo: '🛒 Escenario 3: E-commerce Latino',
+    texto: 'MercadoLibre necesita que su página web sea interactiva: carrito de compras, búsquedas en tiempo real, animaciones. Debe funcionar en cualquier navegador y celular.',
+    opciones: [
+      { nombre: 'Java', desc: 'Robusto pero pesado', correcta: false },
+      { nombre: 'JavaScript', desc: 'El rey de la web interactiva', correcta: true },
+      { nombre: 'C', desc: 'Lenguaje de bajo nivel', correcta: false },
+      { nombre: 'Python', desc: 'Más para servidores', correcta: false }
+    ],
+    explicacion: '✅ ¡Perfecto! JavaScript es el lenguaje de la web. Junto con Node.js, puede usarse también en el servidor. MercadoLibre, Amazon y casi toda la web interactiva lo usa.'
+  },
+  {
+    titulo: '🏢 Escenario 4: Sistema Corporativo',
+    texto: 'Una empresa grande en México necesita un sistema que funcione igual en Windows, Linux y Mac. Debe ser robusto, manejar muchos usuarios al mismo tiempo y durar años sin cambios mayores.',
+    opciones: [
+      { nombre: 'JavaScript', desc: 'Solo para web', correcta: false },
+      { nombre: 'Python', desc: 'Muy flexible', correcta: false },
+      { nombre: 'Java', desc: '"Escribe una vez, ejecuta en cualquier lugar"', correcta: true },
+      { nombre: 'HTML', desc: 'No es un lenguaje de programación', correcta: false }
+    ],
+    explicacion: '✅ ¡Correcto! Java tiene la JVM (Máquina Virtual de Java) que permite que el mismo código corra en cualquier sistema. Bancolombia y BBVA México usan Java para sus sistemas centrales.'
+  },
+  {
+    titulo: '🎮 Escenario 5: Videojuego AAA',
+    texto: 'Un estudio en Argentina quiere crear un videojuego con gráficos ultra realistas que corra fluido en consolas y PCs. Cada milisegundo cuenta para que el juego no se trabe.',
+    opciones: [
+      { nombre: 'Python', desc: 'Muy lento para juegos AAA', correcta: false },
+      { nombre: 'JavaScript', desc: 'No tiene suficiente rendimiento', correcta: false },
+      { nombre: 'C++', desc: 'Control total y máximo rendimiento', correcta: true },
+      { nombre: 'Ruby', desc: 'Lenguaje web', correcta: false }
+    ],
+    explicacion: '✅ ¡Excelente! C++ es el lenguaje de los motores de videojuegos como Unreal Engine. Permite controlar cada detalle del hardware para lograr los gráficos más impresionantes.'
+  }
+];
+
+let escenariosCompletados = 0;
+
+function iniciarModulo3() {
+  escenariosCompletados = 0;
+  construirBiblioteca();
+  const cont = document.getElementById('contenedor-escenarios');
+  cont.innerHTML = '';
+  escenarios.forEach((esc, i) => {
+    const div = document.createElement('div');
+    div.className = 'escenario';
+    div.id = 'esc-' + i;
+    div.innerHTML = `
+      <h3 class="escenario-titulo">${esc.titulo}</h3>
+      <p class="escenario-texto">${esc.texto}</p>
+      <div class="opciones-lenguaje">
+        ${esc.opciones.map((op, j) => `
+          <div class="opcion-lenguaje" onclick="seleccionarOpcion(${i}, ${j})">
+            <div class="nombre-lenguaje">${op.nombre}</div>
+            <div class="desc-lenguaje">${op.desc}</div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="explicacion" id="exp-${i}">${esc.explicacion}</div>
+    `;
+    cont.appendChild(div);
+  });
+  actualizarProgreso(3, 0);
+}
+
+function seleccionarOpcion(escIdx, opIdx) {
+  const esc = document.getElementById('esc-' + escIdx);
+  if (esc.dataset.completado) return;
+  const opciones = esc.querySelectorAll('.opcion-lenguaje');
+  const correcta = escenarios[escIdx].opciones[opIdx].correcta;
+  opciones[opIdx].classList.add(correcta ? 'correcta' : 'incorrecta');
+  if (correcta) {
+    esc.dataset.completado = 'true';
+    document.getElementById('exp-' + escIdx).classList.add('visible');
+    actualizarPuntos(3, 15);
+    escenariosCompletados++;
+    actualizarProgreso(3, (escenariosCompletados / escenarios.length) * 100);
+    notificar('✅ ¡Decisión correcta! +15 puntos');
+    if (escenariosCompletados === escenarios.length) {
+      setTimeout(() => {
+        mostrarModal('🌟', '¡Mapa Completo!', 'Has elegido el lenguaje correcto para cada empresa latinoamericana. ¡Eres un arquitecto de software!');
+      }, 1500);
+    }
+  } else {
+    notificar('❌ Ese no es el mejor lenguaje para este caso', 'error');
+    setTimeout(() => opciones[opIdx].classList.remove('incorrecta'), 1500);
+  }
+}
+
+// ============ MÓDULO 4: ÉTICA ============
+const dilemas = [
+  {
+    titulo: '⚖️ Dilema 1: El Código Copiado',
+    texto: 'Encuentras una librería increíble en internet con licencia GPL (que exige que todo lo que la use sea también abierto). Tu jefe te dice: "Úsala en nuestro producto privado y no digamos nada. Nadie se va a enterar". ¿Qué haces?',
+    decisiones: [
+      { texto: '🔴 Usarla en secreto. El jefe manda y necesitamos el trabajo.', buena: false, retro: '❌ Esto viola la licencia GPL y es un delito legal. Si se descubre, la empresa puede enfrentar demandas millonarias y tú serás responsable. Además, traicionas a la comunidad de desarrolladores que creó la librería gratis.' },
+      { texto: '🟢 Explicarle al jefe que viola la licencia y proponer alternativas: buscar una librería con licencia MIT/Apache, o crear nuestra propia versión.', buena: true, retro: '✅ ¡Excelente decisión! Respetas la ley, la ética profesional y propones soluciones. Las licencias MIT y Apache sí permiten uso privado. Un buen desarrollador siempre busca el camino correcto.' },
+      { texto: '🟡 Borrar los comentarios de licencia para que "no se note".', buena: false, retro: '❌ Esto es fraude deliberado. Eliminar avisos de licencia es ilegal en la mayoría de países. Los auditores de código pueden detectarlo fácilmente.' }
+    ]
+  },
+  {
+    titulo: '🤖 Dilema 2: La IA que Copia',
+    texto: 'Usas una IA para generar código rápidamente. La IA te da un fragmento que funciona perfecto, pero al revisar descubres que es idéntico a código de un proyecto con licencia restrictiva. Tu fecha de entrega es mañana. ¿Qué haces?',
+    decisiones: [
+      { texto: '🔴 Usarlo tal cual. "La IA lo hizo, no yo".', buena: false, retro: '❌ ¡Error! TÚ eres el responsable final de todo lo que compilas. Aceptar código sin auditarlo es transferir tu responsabilidad ética a una máquina. Si viola licencia, el problema es tuyo.' },
+      { texto: '🟢 Reescribirlo con tu propia lógica entendiendo el problema, o buscar una alternativa original. Pedir más tiempo si es necesario.', buena: true, retro: '✅ ¡Correcto! El ingeniero es el único responsable de lo que compila. Entender el código y escribirlo tú mismo (o usar alternativas originales) es el camino ético. La calidad vale más que la velocidad.' },
+      { texto: '🟡 Usarlo y "modificarle algunas variables" para que "no sea igual".', buena: false, retro: '❌ Cambiar nombres de variables no hace que el código sea original. Es como copiar una tarea cambiando palabras. Los detectores de similitud lo identificarán.' }
+    ]
+  },
+  {
+    titulo: '🔒 Dilema 3: Los Datos de los Usuarios',
+    texto: 'Trabajas en una app de salud. Tu compañero te dice: "No perdamos tiempo con encriptación ni validaciones. Hay que lanzar ya. Si hay una filtración de datos de pacientes, ya veremos cómo arreglarlo". ¿Qué haces?',
+    decisiones: [
+      { texto: '🔴 Hacerle caso. La velocidad es lo más importante en una startup.', buena: false, retro: '❌ Negligencia grave. Los datos de salud son sensibles y están protegidos por ley. Una filtración puede dañar a miles de pacientes y destruir la empresa. La seguridad NO es opcional.' },
+      { texto: '🟢 Insistir en implementar encriptación y validaciones desde el inicio. Explicar que "seguridad por diseño" ahorra problemas futuros y protege a los usuarios.', buena: true, retro: '✅ ¡Perfecto! La seguridad por diseño es un deber ético y legal. El desarrollador es el guardián de los datos del usuario. Corregir fallos después cuesta 100 veces más que prevenirlos.' },
+      { texto: '🟡 Hacer encriptación "básica" solo para cumplir, sin revisar si realmente funciona.', buena: false, retro: '❌ La seguridad a medias es peor que ninguna. Una encriptación mal implementada da falsa sensación de protección. Debe hacerse bien desde el principio.' }
+    ]
+  },
+  {
+    titulo: '📜 Dilema 4: El Código Sucio',
+    texto: 'Terminas un proyecto pero con el código desordenado, sin comentarios, con funciones gigantes. Tu cliente no se da cuenta. Tu jefe dice: "Entrégalo así, total el cliente no sabe programar". ¿Qué haces?',
+    decisiones: [
+      { texto: '🔴 Entregarlo así. El cliente paga por resultados, no por código bonito.', buena: false, retro: '❌ Esto crea "deuda técnica": un pasivo financiero y moral. El código será imposible de mantener, actualizar o corregir. Eventualmente fallará y dañará al cliente.' },
+      { texto: '🟢 Documentar, refactorizar y entregar código limpio aunque tome más tiempo. Explicar al cliente que esto garantiza que el sistema dure años.', buena: true, retro: '✅ ¡Excelente! El código limpio es tu firma profesional. La deuda técnica es un fraude al cliente. Un buen desarrollador entrega calidad, no solo "algo que funciona por ahora".' },
+      { texto: '🟡 Agregar algunos comentarios rápidos y entregar.', buena: false, retro: '❌ Comentarios superficiales no arreglan código mal estructurado. Es como poner pintura sobre una casa con problemas estructurales.' }
+    ]
+  },
+  {
+    titulo: '🎓 Dilema 5: El Trabajo de Otro',
+    texto: 'Un compañero de clase te pide su trabajo de programación para "inspirarte". Tú sabes que si lo copias y le cambias algunas cosas, el profesor no lo notará. Ambos necesitan buena nota. ¿Qué haces?',
+    decisiones: [
+      { texto: '🔴 Copiarlo y cambiarle nombres de variables. "Todos lo hacen".', buena: false, retro: '❌ Esto es plagio, un fraude intelectual. Además de ser deshonesto, no aprendes nada. Si te descubren, ambos pueden ser expulsados. Tu código debe ser TU trabajo.' },
+      { texto: '🟢 Negarte amablemente. Ofrecerle estudiar juntos y ayudarlo a entender los conceptos para que haga su propio trabajo.', buena: true, retro: '✅ ¡Correcto! La verdadera colaboración es enseñar, no copiar. Ayudar a un compañero a aprender es inspiración. Copiar su trabajo es parasitismo intelectual. Tu éxito debe construirse sobre tu esfuerzo.' },
+      { texto: '🟡 Copiar solo "una parte" para darte ideas.', buena: false, retro: '❌ Copiar aunque sea una parte sigue siendo plagio. La línea entre inspiración y copia es clara: si no lo escribiste tú ni lo entiendes completamente, es copia.' }
+    ]
+  }
+];
+
+let dilemasCompletados = 0;
+
+function iniciarModulo4() {
+  dilemasCompletados = 0;
+  const cont = document.getElementById('contenedor-dilemas');
+  cont.innerHTML = '';
+  dilemas.forEach((d, i) => {
+    const div = document.createElement('div');
+    div.className = 'dilema';
+    div.id = 'dilema-' + i;
+    div.innerHTML = `
+      <h3 class="dilema-titulo">${d.titulo}</h3>
+      <div class="dilema-texto">${d.texto}</div>
+      <div class="decisiones">
+        ${d.decisiones.map((dec, j) => `
+          <button class="decision" onclick="seleccionarDecision(${i}, ${j})">${dec.texto}</button>
+        `).join('')}
+      </div>
+      <div class="retroalimentacion" id="retro-${i}"></div>
+    `;
+    cont.appendChild(div);
+  });
+  actualizarProgreso(4, 0);
+}
+
+function seleccionarDecision(dilemaIdx, decisionIdx) {
+  const dilema = document.getElementById('dilema-' + dilemaIdx);
+  if (dilema.dataset.completado) return;
+  const dec = dilemas[dilemaIdx].decisiones[decisionIdx];
+  const botones = dilema.querySelectorAll('.decision');
+  botones[decisionIdx].classList.add(dec.buena ? 'elegida-buena' : 'elegida-mala');
+  const retro = document.getElementById('retro-' + dilemaIdx);
+  retro.textContent = dec.retro;
+  retro.className = 'retroalimentacion visible ' + (dec.buena ? 'buena' : 'mala');
+  if (dec.buena) {
+    dilema.dataset.completado = 'true';
+    actualizarPuntos(4, 20);
+    dilemasCompletados++;
+    actualizarProgreso(4, (dilemasCompletados / dilemas.length) * 100);
+    notificar('🛡️ ¡Decisión ética correcta! +20 puntos');
+    botones.forEach(b => b.disabled = true);
+    if (dilemasCompletados === dilemas.length) {
+      setTimeout(() => {
+        mostrarModal('🏆', '¡DECÁLOGO COMPLETADO!', 'Has demostrado ser un desarrollador con ética y valores. ¡Tu código será tu legado!');
+      }, 1500);
+    }
+  } else {
+    notificar('⚠️ Piensa de nuevo... hay una mejor opción', 'error');
+    setTimeout(() => { botones[decisionIdx].classList.remove('elegida-mala'); }, 2000);
+  }
+}
+
+</script>
+</body>
+</html>
